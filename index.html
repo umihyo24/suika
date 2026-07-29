@@ -2,50 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#050817">
-  <title>MERGE WING</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#030615">
+  <title>MERGE WING — Capture the Barrage</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main class="cabinet" aria-labelledby="game-title">
-    <header class="masthead">
-      <div class="brand"><span>TACTICAL MERGE DEFENSE</span><h1 id="game-title">MERGE WING</h1></div>
-      <div class="mission"><span>OBJECTIVE</span><strong><b id="score">000000</b> / <b id="target-score">18000</b></strong></div>
+    <header class="topbar">
+      <div class="brand"><small>COUNTER-BARRAGE SYSTEM</small><h1 id="game-title">MERGE WING</h1></div>
+      <div class="score-block"><small>SCORE</small><strong id="score">000000</strong></div>
     </header>
-
-    <section class="readouts" aria-label="Mission status">
-      <div><small>MULTIPLIER</small><strong id="multiplier">×1.0</strong></div>
-      <div><small>COMBO</small><strong id="combo">0</strong></div>
+    <section class="hud" aria-label="Game status">
       <div><small>HULL</small><strong id="hp">◆ ◆ ◆</strong></div>
-      <div><small>DEFENSE</small><strong id="defense">12</strong></div>
-      <div><small>TIME</small><strong id="remaining-time">01:30</strong></div>
-      <div class="break-meter"><small>BREAK</small><strong id="break-cooldown">READY</strong><i><span id="break-fill"></span></i></div>
+      <div><small>STAGE TIME</small><strong id="stage-time">00:00</strong></div>
+      <div><small>CAPTURED</small><strong><span id="captured-count">0</span> / 6</strong></div>
+      <div><small>HIGHEST</small><strong id="highest-level">—</strong></div>
+      <div class="cyan"><small>CYAN</small><strong id="cyan-count">0</strong></div>
+      <div class="magenta"><small>MAGENTA</small><strong id="magenta-count">0</strong></div>
     </section>
-    <section class="buffbar"><span>ACTIVE SYSTEMS</span><div id="buffs">STANDARD PUSH</div></section>
-
-    <section class="screen" aria-label="MERGE WING playfield">
-      <canvas id="game-canvas" width="960" height="540" aria-label="Horizontal scrolling merge action shooter"></canvas>
+    <section id="boss-hud" class="boss-hud hidden" aria-label="Boss health">
+      <div><small>PRISM FORTRESS</small><strong id="boss-health-text">100%</strong></div>
+      <i><span id="boss-health-fill"></span></i>
+    </section>
+    <section class="screen">
+      <canvas id="game-canvas" width="960" height="540" aria-label="MERGE WING horizontal bullet hell game"></canvas>
       <section id="start-overlay" class="overlay">
-        <div class="overlay-card">
-          <p class="kicker">ENEMY CONVERGENCE DETECTED</p>
-          <h2>COLLIDE. MERGE. BREAK.</h2>
-          <p>Use automatic PUSH fire to drive matching enemies together. Let them evolve for huge rewards—then cut them down with BREAK before they overwhelm the defense line.</p>
-          <div class="legend"><span>PUSH <b>POSITION</b></span><span>TOUCH <b>MERGE</b></span><span>SPACE <b>BREAK</b></span></div>
-          <button id="start-button" type="button">LAUNCH MISSION</button>
+        <div class="card">
+          <p class="eyebrow">WEAPONIZE THE BARRAGE</p>
+          <h2>CAPTURE. MERGE. RETURN.</h2>
+          <p>Focus your field into incoming fire. Matching captured rounds fuse in orbit—hold them for power, or launch them before the orbit becomes a target.</p>
+          <div class="instructions"><span><b>MOVE</b> Pointer / WASD</span><span><b>CAPTURE</b> Hold primary / Shift</span><span><b>COUNTER</b> Space / secondary</span></div>
+          <button id="start-button" type="button">ENGAGE</button>
         </div>
       </section>
       <section id="result-overlay" class="overlay hidden" aria-live="assertive">
-        <div class="overlay-card">
-          <p id="result-kicker" class="kicker">MISSION ENDED</p>
-          <h2 id="result-title">DEFENSE FAILED</h2>
+        <div class="card">
+          <p id="result-kicker" class="eyebrow">MISSION COMPLETE</p>
+          <h2 id="result-title">FORTRESS SHATTERED</h2>
           <small>FINAL SCORE</small><strong id="final-score" class="final-score">0</strong>
-          <button id="restart-button" type="button">RELAUNCH</button>
+          <button id="restart-button" type="button">RESTART</button>
         </div>
       </section>
     </section>
-
-    <footer class="controls"><strong>MOVE</strong> Pointer / WASD / Arrows <i></i><strong>FOCUS</strong> Hold pointer or Shift <i></i><strong>BREAK</strong> Space or pointer press <i></i><strong>PUSH</strong> Automatic</footer>
+    <footer><b>CAPTURE</b> slows movement • matching rounds merge automatically • orbiting rounds can be destroyed • counters spend the highest level first</footer>
   </main>
   <script src="game.js"></script>
 </body>

@@ -10,47 +10,42 @@
 <body>
   <main class="cabinet" aria-labelledby="game-title">
     <header class="masthead">
-      <div class="brand"><span>NEON DEFENSE SYSTEM</span><h1 id="game-title">MERGE WING</h1></div>
-      <section class="readouts" aria-label="Mission status">
-        <div><small>SCORE</small><strong id="score">0000000</strong></div>
-        <div><small>MULTI</small><strong id="multiplier">×1.0</strong></div>
-        <div><small>COMBO</small><strong id="combo">0</strong></div>
-        <div><small>HULL</small><strong id="hp">◆ ◆ ◆</strong></div>
-        <div><small>WING</small><strong id="weapon-level">LV.1</strong></div>
-        <div><small>TIME</small><strong id="stage-time">00:00</strong></div>
-      </section>
+      <div class="brand"><span>TACTICAL MERGE DEFENSE</span><h1 id="game-title">MERGE WING</h1></div>
+      <div class="mission"><span>OBJECTIVE</span><strong><b id="score">000000</b> / <b id="target-score">18000</b></strong></div>
     </header>
 
-    <section class="merge-console" aria-label="Merge core inventory">
-      <div class="tray-label"><span>CORE TRAY</span><small>PAIR EQUAL CORES TO EVOLVE</small></div>
-      <div id="core-tray" class="core-tray" aria-live="polite">
-        <span class="core-slot"></span><span class="core-slot"></span><span class="core-slot"></span>
-        <span class="core-slot"></span><span class="core-slot"></span><span class="core-slot"></span>
-      </div>
-      <div class="next-core"><small>NEXT DROP</small><span id="next-core" class="core-token level-1">1</span></div>
+    <section class="readouts" aria-label="Mission status">
+      <div><small>MULTIPLIER</small><strong id="multiplier">×1.0</strong></div>
+      <div><small>COMBO</small><strong id="combo">0</strong></div>
+      <div><small>HULL</small><strong id="hp">◆ ◆ ◆</strong></div>
+      <div><small>DEFENSE</small><strong id="defense">12</strong></div>
+      <div><small>TIME</small><strong id="remaining-time">01:30</strong></div>
+      <div class="break-meter"><small>BREAK</small><strong id="break-cooldown">READY</strong><i><span id="break-fill"></span></i></div>
     </section>
+    <section class="buffbar"><span>ACTIVE SYSTEMS</span><div id="buffs">STANDARD PUSH</div></section>
 
     <section class="screen" aria-label="MERGE WING playfield">
-      <canvas id="game-canvas" width="960" height="540" aria-label="Horizontal scrolling bullet hell shooter"></canvas>
+      <canvas id="game-canvas" width="960" height="540" aria-label="Horizontal scrolling merge action shooter"></canvas>
       <section id="start-overlay" class="overlay">
         <div class="overlay-card">
-          <p class="kicker">CORE CARRIER DETECTED</p>
-          <h2>MERGE. EVOLVE. SURVIVE.</h2>
-          <p>Destroy the swarm, collect matching cores, and evolve your wing before the carrier arrives.</p>
-          <button id="start-button" type="button">LAUNCH</button>
+          <p class="kicker">ENEMY CONVERGENCE DETECTED</p>
+          <h2>COLLIDE. MERGE. BREAK.</h2>
+          <p>Use automatic PUSH fire to drive matching enemies together. Let them evolve for huge rewards—then cut them down with BREAK before they overwhelm the defense line.</p>
+          <div class="legend"><span>PUSH <b>POSITION</b></span><span>TOUCH <b>MERGE</b></span><span>SPACE <b>BREAK</b></span></div>
+          <button id="start-button" type="button">LAUNCH MISSION</button>
         </div>
       </section>
       <section id="result-overlay" class="overlay hidden" aria-live="assertive">
         <div class="overlay-card">
           <p id="result-kicker" class="kicker">MISSION ENDED</p>
-          <h2 id="result-title">GAME OVER</h2>
+          <h2 id="result-title">DEFENSE FAILED</h2>
           <small>FINAL SCORE</small><strong id="final-score" class="final-score">0</strong>
           <button id="restart-button" type="button">RELAUNCH</button>
         </div>
       </section>
     </section>
 
-    <footer class="controls"><strong>MOVE</strong> Pointer / WASD / Arrows <i></i><strong>FOCUS</strong> Hold pointer or Shift to slow down and reveal your hitbox <i></i><strong>FIRE</strong> Automatic</footer>
+    <footer class="controls"><strong>MOVE</strong> Pointer / WASD / Arrows <i></i><strong>FOCUS</strong> Hold pointer or Shift <i></i><strong>BREAK</strong> Space or pointer press <i></i><strong>PUSH</strong> Automatic</footer>
   </main>
   <script src="game.js"></script>
 </body>

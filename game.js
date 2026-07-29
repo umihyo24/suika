@@ -1,209 +1,129 @@
 'use strict';
 
 const CONFIG = Object.freeze({
-  width:960,height:540,maxDelta:0.034,worldMargin:90,backgroundSpeed:28,gridSpeed:44,starCount:82,
-  colors:{space:'#030619',cyan:'#42f5ff',blue:'#608cff',pink:'#ff4fcc',red:'#ff466d',orange:'#ff9347',white:'#f4ffff',grid:'#1d3f73',boss:'#b94dff'},
-  player:{startX:145,startY:270,width:47,height:27,radius:19,hitRadius:6,collectRadius:26,maxHp:3,moveLerp:12,keyboardSpeed:350,slowFactor:0.38,invincible:1.7,clearRadius:155,flashRate:12,trailInterval:0.035},
-  weapons:{
-    1:{interval:0.22,shots:[{dy:0,angle:0,damage:1,penetrating:false,speed:620}],core:{score:100,color:'#49f4ff',size:12}},
-    2:{interval:0.19,shots:[{dy:-7,angle:0,damage:1,penetrating:false,speed:640},{dy:7,angle:0,damage:1,penetrating:false,speed:640}],core:{score:250,color:'#75ff7c',size:14}},
-    3:{interval:0.18,shots:[{dy:0,angle:-0.16,damage:1,penetrating:false,speed:650},{dy:0,angle:0,damage:1,penetrating:false,speed:650},{dy:0,angle:0.16,damage:1,penetrating:false,speed:650}],core:{score:600,color:'#ffe658',size:16}},
-    4:{interval:0.17,shots:[{dy:-10,angle:0,damage:1,penetrating:false,speed:670},{dy:0,angle:0,damage:2,penetrating:true,speed:560},{dy:10,angle:0,damage:1,penetrating:false,speed:670}],core:{score:1400,color:'#ff7a45',size:18}},
-    5:{interval:0.15,shots:[{dy:0,angle:-0.25,damage:1,penetrating:false,speed:680},{dy:0,angle:-0.12,damage:1,penetrating:false,speed:680},{dy:0,angle:0,damage:1,penetrating:false,speed:680},{dy:0,angle:0.12,damage:1,penetrating:false,speed:680},{dy:0,angle:0.25,damage:1,penetrating:false,speed:680},{dy:0,angle:0,damage:2,penetrating:true,speed:480}],core:{score:3200,color:'#ff4fc8',size:21}}
+  WIDTH:960,HEIGHT:540,MAX_DELTA:0.033,MAX_ENEMY_LEVEL:4,TIME_LIMIT:90,TARGET_SCORE:18000,DEFENSE:12,
+  CLEANUP_MARGIN:100,DEFENSE_LINE_X:66,ENEMY_CAP_START:7,ENEMY_CAP_END:16,DIFFICULTY_RAMP:75,
+  COLORS:{space:'#030619',navy:'#07102b',cyan:'#42f5ff',blue:'#608cff',pink:'#ff4fcc',red:'#ff466d',white:'#f4ffff',grid:'#1d4978',green:'#87ff8a',yellow:'#ffe66b'},
+  PLAYER:{START_X:145,START_Y:270,RADIUS:19,HITBOX:6,HP:3,SPEED:355,SLOW_FACTOR:.38,POINTER_LERP:15,INVINCIBILITY:1.65,BULLET_CLEAR_RADIUS:145,FLASH_INTERVAL:.1,BODY_DAMAGE:1},
+  PUSH:{INTERVAL:.22,BUFF_INTERVAL:.13,SPEED:650,DAMAGE:1,RADIUS:5,HORIZONTAL_FORCE:150,BUFF_HORIZONTAL_FORCE:245,VERTICAL_FORCE:-210,DAMPING:.94,PENETRATION_HITS:4},
+  BREAK:{DAMAGE:22,DURATION:.22,COOLDOWN:5.5,HALF_HEIGHT:18,START_OFFSET:15,END_MARGIN:12},
+  ENEMY_LEVELS:{
+    1:{RADIUS:18,HP:7,SCORE:100,SPEED:30,COLOR:'#55eaff',FIRE_INTERVAL:3.1,ESCAPE_DAMAGE:1,SHOT_COUNT:1,SPREAD:0,BULLET_SPEED:145},
+    2:{RADIUS:27,HP:18,SCORE:350,SPEED:36,COLOR:'#86ff79',FIRE_INTERVAL:2.5,ESCAPE_DAMAGE:2,SHOT_COUNT:2,SPREAD:.18,BULLET_SPEED:165},
+    3:{RADIUS:38,HP:42,SCORE:1200,SPEED:42,COLOR:'#ffe568',FIRE_INTERVAL:1.9,ESCAPE_DAMAGE:4,SHOT_COUNT:3,SPREAD:.24,BULLET_SPEED:185},
+    4:{RADIUS:51,HP:90,SCORE:4000,SPEED:48,COLOR:'#ff685f',FIRE_INTERVAL:1.35,ESCAPE_DAMAGE:8,SHOT_COUNT:7,SPREAD:.22,BULLET_SPEED:205}
   },
-  bullet:{playerRadius:5,penetratingRadius:8,enemyRadius:6,enemySpeed:205},
-  enemies:{
-    scout:{width:39,height:28,radius:17,hp:4,speed:105,fireInterval:2.15,score:180,dropChance:0.42},
-    weaver:{width:47,height:35,radius:21,hp:8,speed:82,fireInterval:2.55,score:420,dropChance:0.58,waveAmplitude:72,waveFrequency:2.1,spread:0.22}
-  },
-  core:{traySize:6,maxLevel:5,nextLevelTwoChance:0.24,driftSpeed:54,attractDistance:150,attractStrength:5.5,orbitSpeed:2.5,collectionScoreFactor:0.35},
-  combo:{timeout:3.2,maxMultiplier:5,mergeGain:0.35,killGain:0.12},
-  stage:{earlyEnd:20,midEnd:45,bossTime:70,displayDuration:90,spawnEarly:2.15,spawnMid:1.55,spawnLate:1.0,lateSpeedScale:1.25},
-  boss:{name:'CORE CARRIER',width:132,height:164,radius:67,hp:420,speed:86,targetX:790,entrySpeed:95,score:15000,thresholdScore:1600,thresholds:[0.75,0.5,0.25],patternDuration:6,aimedInterval:0.55,fanInterval:1.25,laneInterval:0.72,aimedBurst:3,burstSpread:0.1,fanCount:9,fanArc:1.7,laneCount:8,laneGap:2,laneSpeed:175,verticalRange:155},
-  particle:{smallCount:9,mergeCount:22,hitCount:18,bossCount:90,life:0.65,bossLife:1.5,speed:120,bossSpeed:250,size:3},
-  text:{life:1.1,riseSpeed:38},shake:{hit:10,merge:5,boss:18,decay:28,trayTime:0.2,weaponFlash:0.22,warning:0.55},
-  scoring:{bossDamageUnit:1}, keyboard:{diagonal:0.7071}, render:{lineWidth:2,glow:18,starMin:1,starRange:2,gridGap:60,nebulaAlpha:0.16,lowHpAlpha:0.18,shipFlashAlpha:0.28,coreRingGap:7,fontSmall:11,fontMedium:15,fontLarge:22,bossBarWidth:500,bossBarHeight:14,bossBarY:19,bossBarX:230},
-  ids:{start:1}, random:{half:0.5,fullCircle:Math.PI*2}, time:{minute:60,pad:2}, input:{pointerIdNone:-1}
+  ENEMY_BULLET_RADIUS:6,ENEMY_PUSH_DAMPING:.94,ENEMY_BOUNCE:.65,ENEMY_SPEED_RAMP:.3,FIRE_INTERVAL_RAMP:.22,
+  SPAWN:{START_INTERVAL:1.65,END_INTERVAL:.72,MIN_Y_PADDING:6,PAIR_BIAS:.64,PAIR_Y_VARIANCE:32},
+  MERGE:{DELAY:0,PROTECTION:.42,SEPARATION:.52,EPSILON:.0001,RING_LIFE:.65},
+  COMBO:{TIMEOUT:3.4,STEP:.12,MAX_MULTIPLIER:3},
+  BUFF:{FIRE_RATE_DURATION:7,PUSH_POWER_DURATION:7,PENETRATION_DURATION:8},
+  PARTICLE:{MAX:420,DESTROY_COUNT:18,MERGE_COUNT:30,HIT_COUNT:16,SPEED:185,LIFE:.72,SIZE:3,DRAG:.97},
+  TEXT:{LIFE:1.05,RISE_SPEED:36},SHAKE:{HIT:10,MERGE:7,DESTROY:4,DECAY:28},
+  BACKGROUND:{STAR_COUNT:88,STAR_SPEED:20,GRID_GAP:60,GRID_SPEED:34,GRID_HORIZON:190},
+  RENDER:{GLOW:18,LINE:2,FULL_CIRCLE:Math.PI*2,ENEMY_SIDES:6,HP_BAR_WIDTH:1.5,WARNING_PULSE:5},
+  INPUT:{NONE:-1},IDS:{START:1},TIME:{MINUTE:60,PAD:2},RANDOM:{HALF:.5}
 });
 
-const game = (() => {
-  const gameState = {
-    phase:'start',result:null,elapsedTime:0,score:0,scoreMultiplier:1,combo:0,comboTimer:0,
-    player:null,enemies:[],playerBullets:[],enemyBullets:[],cores:[],particles:[],floatingTexts:[],
-    coreTray:[],activeWeaponLevel:1,nextCoreLevel:1,spawnTimers:{enemy:0},boss:null,bossSpawned:false,
-    input:{pointerX:CONFIG.player.startX,pointerY:CONFIG.player.startY,slowMode:false,pointerActive:false,pointerId:CONFIG.input.pointerIdNone,keys:new Set()},
-    lastTimestamp:0,entityId:CONFIG.ids.start,screenShake:0,trayShake:0,weaponFlash:0,warningFlash:0,
-    backgroundOffset:0,gridOffset:0,stars:[],dom:{},ctx:null,animationFrame:null
-  };
+const gameState={
+  phase:'start',result:null,elapsedTime:0,score:0,targetScore:CONFIG.TARGET_SCORE,combo:0,comboTimer:0,scoreMultiplier:1,
+  player:null,enemies:[],pushBullets:[],enemyBullets:[],particles:[],floatingTexts:[],mergeQueue:[],mergingEnemyIds:new Set(),
+  breakShot:{active:false,timer:0,cooldown:0,hitEnemyIds:new Set()},buffs:{fireRate:0,pushPower:0,penetration:0},defense:CONFIG.DEFENSE,
+  spawnTimers:{enemy:0},input:{pointerX:CONFIG.PLAYER.START_X,pointerY:CONFIG.PLAYER.START_Y,pointerSeen:false,pointerDown:false,pointerId:CONFIG.INPUT.NONE,slowMode:false,breakRequested:false,keys:new Set()},
+  screenShake:0,lastTimestamp:0,entityId:CONFIG.IDS.START,backgroundOffset:0,stars:[],dom:{},ctx:null,animationFrame:null
+};
 
-  const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
-  const distanceSquared=(a,b)=>{const dx=a.x-b.x;const dy=a.y-b.y;return dx*dx+dy*dy;};
-  const circlesTouch=(a,b,ar=a.radius,br=b.radius)=>distanceSquared(a,b)<=(ar+br)*(ar+br);
-  const nextId=()=>gameState.entityId++;
-  const randomRange=(min,max)=>min+Math.random()*(max-min);
-  const addScore=(amount)=>{gameState.score+=Math.round(amount*gameState.scoreMultiplier);};
+const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+const random=(min,max)=>min+Math.random()*(max-min);
+const squaredDistance=(a,b)=>{const x=a.x-b.x,y=a.y-b.y;return x*x+y*y;};
+const nextId=()=>gameState.entityId++;
 
-  function cacheDom(){
-    const ids=['game-canvas','score','multiplier','combo','hp','weapon-level','stage-time','core-tray','next-core','start-overlay','result-overlay','result-kicker','result-title','final-score','start-button','restart-button'];
-    ids.forEach(id=>{gameState.dom[id]=document.getElementById(id);});
-    const canvas=gameState.dom['game-canvas'];
-    gameState.ctx=canvas?canvas.getContext('2d'):null;
-  }
+function cacheDom(){
+  ['game-canvas','score','target-score','multiplier','combo','hp','defense','remaining-time','break-cooldown','break-fill','buffs','start-overlay','result-overlay','result-kicker','result-title','final-score','start-button','restart-button'].forEach(id=>gameState.dom[id]=document.getElementById(id));
+  const canvas=gameState.dom['game-canvas'];gameState.ctx=canvas?canvas.getContext('2d'):null;
+}
+function createPlayer(){return {id:nextId(),type:'player',active:true,x:CONFIG.PLAYER.START_X,y:CONFIG.PLAYER.START_Y,radius:CONFIG.PLAYER.RADIUS,hitRadius:CONFIG.PLAYER.HITBOX,hp:CONFIG.PLAYER.HP,maxHp:CONFIG.PLAYER.HP,invincible:0,fireTimer:0};}
+function createStars(){gameState.stars=Array.from({length:CONFIG.BACKGROUND.STAR_COUNT},()=>({x:Math.random()*CONFIG.WIDTH,y:Math.random()*CONFIG.HEIGHT,size:random(1,3),depth:random(.35,1)}));}
+function resetGame(){
+  gameState.result=null;gameState.elapsedTime=0;gameState.score=0;gameState.targetScore=CONFIG.TARGET_SCORE;gameState.combo=0;gameState.comboTimer=0;gameState.scoreMultiplier=1;
+  gameState.entityId=CONFIG.IDS.START;gameState.player=createPlayer();gameState.enemies=[];gameState.pushBullets=[];gameState.enemyBullets=[];gameState.particles=[];gameState.floatingTexts=[];gameState.mergeQueue=[];gameState.mergingEnemyIds=new Set();
+  gameState.breakShot={active:false,timer:0,cooldown:0,hitEnemyIds:new Set()};gameState.buffs={fireRate:0,pushPower:0,penetration:0};gameState.defense=CONFIG.DEFENSE;gameState.spawnTimers={enemy:.35};
+  gameState.input.pointerX=CONFIG.PLAYER.START_X;gameState.input.pointerY=CONFIG.PLAYER.START_Y;gameState.input.pointerSeen=false;gameState.input.pointerDown=false;gameState.input.pointerId=CONFIG.INPUT.NONE;gameState.input.slowMode=false;gameState.input.breakRequested=false;gameState.input.keys=new Set();
+  gameState.screenShake=0;gameState.lastTimestamp=0;gameState.backgroundOffset=0;createStars();syncHud();
+}
+function setPhase(phase){gameState.phase=phase;gameState.dom['start-overlay']?.classList.toggle('hidden',phase!=='start');gameState.dom['result-overlay']?.classList.toggle('hidden',phase!=='gameover');}
+function startGame(){resetGame();setPhase('playing');}
+function restartGame(){startGame();}
+function pointerPosition(event){const canvas=gameState.dom['game-canvas'],rect=canvas?.getBoundingClientRect();if(!canvas||!rect||rect.width<=0||rect.height<=0)return;gameState.input.pointerX=clamp((event.clientX-rect.left)*CONFIG.WIDTH/rect.width,CONFIG.PLAYER.RADIUS,CONFIG.WIDTH-CONFIG.PLAYER.RADIUS);gameState.input.pointerY=clamp((event.clientY-rect.top)*CONFIG.HEIGHT/rect.height,CONFIG.PLAYER.RADIUS,CONFIG.HEIGHT-CONFIG.PLAYER.RADIUS);gameState.input.pointerSeen=true;}
+function requestBreakShot(){if(gameState.phase==='playing')gameState.input.breakRequested=true;}
+function bindEvents(){
+  const canvas=gameState.dom['game-canvas'],stop=e=>e.stopPropagation();
+  gameState.dom['start-button']?.addEventListener('pointerdown',stop);gameState.dom['restart-button']?.addEventListener('pointerdown',stop);gameState.dom['start-button']?.addEventListener('click',startGame);gameState.dom['restart-button']?.addEventListener('click',restartGame);
+  canvas?.addEventListener('pointermove',e=>{if(gameState.phase==='playing')pointerPosition(e);});
+  canvas?.addEventListener('pointerdown',e=>{if(gameState.phase!=='playing'||e.button!==0)return;pointerPosition(e);gameState.input.pointerDown=true;gameState.input.slowMode=true;gameState.input.pointerId=e.pointerId;canvas.setPointerCapture(e.pointerId);requestBreakShot();e.preventDefault();});
+  const release=e=>{if(e.pointerId!==gameState.input.pointerId)return;gameState.input.pointerDown=false;gameState.input.pointerId=CONFIG.INPUT.NONE;gameState.input.slowMode=gameState.input.keys.has('ShiftLeft')||gameState.input.keys.has('ShiftRight');};canvas?.addEventListener('pointerup',release);canvas?.addEventListener('pointercancel',release);
+  window.addEventListener('keydown',e=>{if(gameState.phase!=='playing')return;const movement=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD','ShiftLeft','ShiftRight'];if(movement.includes(e.code)){gameState.input.keys.add(e.code);gameState.input.slowMode=e.shiftKey||gameState.input.pointerDown;e.preventDefault();}if(e.code==='Space'){if(!e.repeat)requestBreakShot();e.preventDefault();}});
+  window.addEventListener('keyup',e=>{gameState.input.keys.delete(e.code);gameState.input.slowMode=gameState.input.pointerDown||gameState.input.keys.has('ShiftLeft')||gameState.input.keys.has('ShiftRight');});window.addEventListener('blur',()=>{gameState.input.keys.clear();gameState.input.slowMode=gameState.input.pointerDown;});
+}
+function createEnemy(level,x=CONFIG.WIDTH+CONFIG.ENEMY_LEVELS[level].RADIUS,y=random(CONFIG.ENEMY_LEVELS[level].RADIUS,CONFIG.HEIGHT-CONFIG.ENEMY_LEVELS[level].RADIUS),vx=0,vy=0){
+  const def=CONFIG.ENEMY_LEVELS[level];if(!def)return null;return {id:nextId(),type:'enemy',active:true,level,x,y,vx,vy,radius:def.RADIUS,hp:def.HP,maxHp:def.HP,score:def.SCORE,fireTimer:random(def.FIRE_INTERVAL*.5,def.FIRE_INTERVAL),mergeProtectionTimer:0,age:0};
+}
+function createPushBullet(){const p=gameState.player;if(!p)return null;return {id:nextId(),type:'pushBullet',active:true,x:p.x+p.radius,y:p.y,vx:CONFIG.PUSH.SPEED,vy:0,radius:CONFIG.PUSH.RADIUS,damage:CONFIG.PUSH.DAMAGE,hitsLeft:gameState.buffs.penetration>0?CONFIG.PUSH.PENETRATION_HITS:1,hitIds:new Set()};}
+function createEnemyBullet(enemy,angle){const def=CONFIG.ENEMY_LEVELS[enemy.level];return {id:nextId(),type:'enemyBullet',active:true,x:enemy.x-enemy.radius*.55,y:enemy.y,vx:Math.cos(angle)*def.BULLET_SPEED,vy:Math.sin(angle)*def.BULLET_SPEED,radius:CONFIG.ENEMY_BULLET_RADIUS};}
+function activateBreakShot(){if(gameState.breakShot.active||gameState.breakShot.cooldown>0)return;gameState.breakShot.active=true;gameState.breakShot.timer=CONFIG.BREAK.DURATION;gameState.breakShot.cooldown=CONFIG.BREAK.COOLDOWN;gameState.breakShot.hitEnemyIds.clear();gameState.screenShake=Math.max(gameState.screenShake,CONFIG.SHAKE.MERGE);}
+function update(dt){
+  if(gameState.phase!=='playing')return;gameState.elapsedTime+=dt;gameState.backgroundOffset+=CONFIG.BACKGROUND.STAR_SPEED*dt;
+  updatePlayer(dt);updatePlayerFiring(dt);updateBreakShot(dt);updateBuffs(dt);updateCombo(dt);updateSpawning(dt);updateEnemies(dt);updateEnemyFiring(dt);updateBullets(dt);updateEffects(dt);
+  checkPushBulletCollisions();checkBreakShotCollisions();checkPlayerCollisions();checkEnemyPairCollisions();processMergeQueue();cleanupEntities();
+  if(gameState.phase==='playing'&&gameState.score>=gameState.targetScore)triggerClear();else if(gameState.phase==='playing'&&gameState.elapsedTime>=CONFIG.TIME_LIMIT)triggerDefeat();syncHud();
+}
+function updatePlayer(dt){const p=gameState.player;if(!p?.active)return;p.invincible=Math.max(0,p.invincible-dt);let dx=0,dy=0,k=gameState.input.keys;if(k.has('ArrowLeft')||k.has('KeyA'))dx--;if(k.has('ArrowRight')||k.has('KeyD'))dx++;if(k.has('ArrowUp')||k.has('KeyW'))dy--;if(k.has('ArrowDown')||k.has('KeyS'))dy++;const slow=gameState.input.slowMode?CONFIG.PLAYER.SLOW_FACTOR:1;if(dx||dy){const length=Math.hypot(dx,dy)||1;p.x+=dx/length*CONFIG.PLAYER.SPEED*slow*dt;p.y+=dy/length*CONFIG.PLAYER.SPEED*slow*dt;}else if(gameState.input.pointerSeen){const amount=clamp(CONFIG.PLAYER.POINTER_LERP*slow*dt,0,1);p.x+=(gameState.input.pointerX-p.x)*amount;p.y+=(gameState.input.pointerY-p.y)*amount;}p.x=clamp(p.x,p.radius,CONFIG.WIDTH-p.radius);p.y=clamp(p.y,p.radius,CONFIG.HEIGHT-p.radius);}
+function updatePlayerFiring(dt){const p=gameState.player;if(!p)return;p.fireTimer-=dt;if(p.fireTimer<=0){const bullet=createPushBullet();if(bullet)gameState.pushBullets.push(bullet);p.fireTimer=gameState.buffs.fireRate>0?CONFIG.PUSH.BUFF_INTERVAL:CONFIG.PUSH.INTERVAL;}}
+function updateBreakShot(dt){if(gameState.input.breakRequested){activateBreakShot();gameState.input.breakRequested=false;}gameState.breakShot.cooldown=Math.max(0,gameState.breakShot.cooldown-dt);if(gameState.breakShot.active){gameState.breakShot.timer=Math.max(0,gameState.breakShot.timer-dt);if(gameState.breakShot.timer<=0)gameState.breakShot.active=false;}}
+function updateBuffs(dt){Object.keys(gameState.buffs).forEach(key=>gameState.buffs[key]=Math.max(0,gameState.buffs[key]-dt));}
+function updateCombo(dt){if(gameState.combo<=0)return;gameState.comboTimer=Math.max(0,gameState.comboTimer-dt);if(gameState.comboTimer<=0)resetCombo();}
+function updateSpawning(dt){gameState.spawnTimers.enemy-=dt;const progress=clamp(gameState.elapsedTime/CONFIG.DIFFICULTY_RAMP,0,1),cap=Math.floor(CONFIG.ENEMY_CAP_START+(CONFIG.ENEMY_CAP_END-CONFIG.ENEMY_CAP_START)*progress);if(gameState.spawnTimers.enemy>0||gameState.enemies.length>=cap)return;let y=random(CONFIG.ENEMY_LEVELS[1].RADIUS+CONFIG.SPAWN.MIN_Y_PADDING,CONFIG.HEIGHT-CONFIG.ENEMY_LEVELS[1].RADIUS-CONFIG.SPAWN.MIN_Y_PADDING);const recent=gameState.enemies.filter(e=>e?.active&&e.level===1&&e.x>CONFIG.WIDTH*.58);if(recent.length&&Math.random()<CONFIG.SPAWN.PAIR_BIAS)y=clamp(recent[recent.length-1].y+random(-CONFIG.SPAWN.PAIR_Y_VARIANCE,CONFIG.SPAWN.PAIR_Y_VARIANCE),CONFIG.ENEMY_LEVELS[1].RADIUS,CONFIG.HEIGHT-CONFIG.ENEMY_LEVELS[1].RADIUS);const enemy=createEnemy(1,undefined,y);if(enemy)gameState.enemies.push(enemy);gameState.spawnTimers.enemy=CONFIG.SPAWN.START_INTERVAL+(CONFIG.SPAWN.END_INTERVAL-CONFIG.SPAWN.START_INTERVAL)*progress;}
+function updateEnemies(dt){const progress=clamp(gameState.elapsedTime/CONFIG.DIFFICULTY_RAMP,0,1);gameState.enemies.forEach(e=>{if(!e?.active)return;const def=CONFIG.ENEMY_LEVELS[e.level];e.age+=dt;e.mergeProtectionTimer=Math.max(0,e.mergeProtectionTimer-dt);e.x+=(-def.SPEED*(1+progress*CONFIG.ENEMY_SPEED_RAMP)+e.vx)*dt;e.y+=e.vy*dt;e.vx*=Math.pow(CONFIG.ENEMY_PUSH_DAMPING,dt*60);e.vy*=Math.pow(CONFIG.ENEMY_PUSH_DAMPING,dt*60);if(e.y-e.radius<0){e.y=e.radius;e.vy=Math.abs(e.vy)*CONFIG.ENEMY_BOUNCE;}else if(e.y+e.radius>CONFIG.HEIGHT){e.y=CONFIG.HEIGHT-e.radius;e.vy=-Math.abs(e.vy)*CONFIG.ENEMY_BOUNCE;}if(e.x+e.radius<CONFIG.DEFENSE_LINE_X)handleEnemyEscape(e);});}
+function updateEnemyFiring(dt){const p=gameState.player,progress=clamp(gameState.elapsedTime/CONFIG.DIFFICULTY_RAMP,0,1);if(!p)return;gameState.enemies.forEach(e=>{if(!e?.active)return;e.fireTimer-=dt;if(e.fireTimer>0)return;const def=CONFIG.ENEMY_LEVELS[e.level],aim=Math.atan2(p.y-e.y,p.x-e.x),center=(def.SHOT_COUNT-1)*.5;for(let i=0;i<def.SHOT_COUNT;i++)gameState.enemyBullets.push(createEnemyBullet(e,aim+(i-center)*def.SPREAD));e.fireTimer=def.FIRE_INTERVAL*(1-progress*CONFIG.FIRE_INTERVAL_RAMP);});}
+function updateBullets(dt){[gameState.pushBullets,gameState.enemyBullets].forEach(list=>list.forEach(b=>{if(!b?.active)return;b.x+=b.vx*dt;b.y+=b.vy*dt;if(b.x<-CONFIG.CLEANUP_MARGIN||b.x>CONFIG.WIDTH+CONFIG.CLEANUP_MARGIN||b.y<-CONFIG.CLEANUP_MARGIN||b.y>CONFIG.HEIGHT+CONFIG.CLEANUP_MARGIN)b.active=false;}));}
+function updateEffects(dt){gameState.particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=CONFIG.PARTICLE.DRAG;p.vy*=CONFIG.PARTICLE.DRAG;p.life-=dt;p.radius+=p.ring?CONFIG.MERGE.RING_LIFE*60*dt:0;});gameState.floatingTexts.forEach(t=>{t.y-=CONFIG.TEXT.RISE_SPEED*dt;t.life-=dt;});gameState.screenShake=Math.max(0,gameState.screenShake-CONFIG.SHAKE.DECAY*dt);}
+function checkPushBulletCollisions(){gameState.pushBullets.forEach(b=>{if(!b?.active)return;gameState.enemies.forEach(e=>{if(!e?.active||!b.active||b.hitIds.has(e.id))return;const range=b.radius+e.radius;if(squaredDistance(b,e)>range*range)return;b.hitIds.add(e.id);const offsetY=clamp((b.y-e.y)/Math.max(e.radius,CONFIG.MERGE.EPSILON),-1,1),force=gameState.buffs.pushPower>0?CONFIG.PUSH.BUFF_HORIZONTAL_FORCE:CONFIG.PUSH.HORIZONTAL_FORCE;e.vx+=force;e.vy+=CONFIG.PUSH.VERTICAL_FORCE*offsetY;damageEnemy(e,b.damage);b.hitsLeft--;if(b.hitsLeft<=0)b.active=false;spawnParticles(b.x,b.y,CONFIG.COLORS.cyan,4);});});}
+function checkBreakShotCollisions(){const p=gameState.player,s=gameState.breakShot;if(!p||!s.active)return;gameState.enemies.forEach(e=>{if(!e?.active||s.hitEnemyIds.has(e.id)||e.x+e.radius<p.x+CONFIG.BREAK.START_OFFSET)return;if(Math.abs(e.y-p.y)<=CONFIG.BREAK.HALF_HEIGHT+e.radius){s.hitEnemyIds.add(e.id);damageEnemy(e,CONFIG.BREAK.DAMAGE);spawnParticles(e.x,e.y,CONFIG.COLORS.white,CONFIG.PARTICLE.HIT_COUNT);}});}
+function checkPlayerCollisions(){const p=gameState.player;if(!p?.active)return;gameState.enemyBullets.forEach(b=>{if(!b?.active)return;const r=b.radius+p.hitRadius;if(squaredDistance(b,p)<=r*r){b.active=false;damagePlayer();}});gameState.enemies.forEach(e=>{if(!e?.active)return;const r=e.radius+p.hitRadius;if(squaredDistance(e,p)<=r*r)damagePlayer();});}
+function checkEnemyPairCollisions(){for(let i=0;i<gameState.enemies.length;i++){const a=gameState.enemies[i];if(!a?.active||gameState.mergingEnemyIds.has(a.id))continue;for(let j=i+1;j<gameState.enemies.length;j++){const b=gameState.enemies[j];if(!b?.active||gameState.mergingEnemyIds.has(b.id))continue;const r=a.radius+b.radius,dx=b.x-a.x,dy=b.y-a.y,distSq=dx*dx+dy*dy;if(distSq>r*r)continue;separateEnemies(a,b,dx,dy,distSq,r);if(a.level===b.level&&a.level<CONFIG.MAX_ENEMY_LEVEL&&a.mergeProtectionTimer<=0&&b.mergeProtectionTimer<=0)enqueueEnemyMerge(a,b);}}}
+function separateEnemies(a,b,dx,dy,distSq,minDistance){let nx,ny,distance;if(distSq<CONFIG.MERGE.EPSILON){nx=(a.id+b.id)%2===0?1:-1;ny=0;distance=0;}else{distance=Math.sqrt(distSq);nx=dx/distance;ny=dy/distance;}const move=(minDistance-distance)*CONFIG.MERGE.SEPARATION;a.x-=nx*move*.5;a.y-=ny*move*.5;b.x+=nx*move*.5;b.y+=ny*move*.5;}
+function enqueueEnemyMerge(a,b){if(!a?.active||!b?.active||gameState.mergingEnemyIds.has(a.id)||gameState.mergingEnemyIds.has(b.id))return;gameState.mergingEnemyIds.add(a.id);gameState.mergingEnemyIds.add(b.id);gameState.mergeQueue.push({aId:a.id,bId:b.id});}
+function processMergeQueue(){const queue=gameState.mergeQueue.splice(0);queue.forEach(item=>mergeEnemies(item));}
+function mergeEnemies(item){const a=gameState.enemies.find(e=>e?.id===item.aId),b=gameState.enemies.find(e=>e?.id===item.bId);gameState.mergingEnemyIds.delete(item.aId);gameState.mergingEnemyIds.delete(item.bId);if(!a?.active||!b?.active||a.level!==b.level||a.level>=CONFIG.MAX_ENEMY_LEVEL)return;const x=(a.x+b.x)*.5,y=(a.y+b.y)*.5,vx=(a.vx+b.vx)*.5,vy=(a.vy+b.vy)*.5;a.active=false;b.active=false;const merged=createEnemy(a.level+1,x,y,vx,vy);if(!merged)return;merged.mergeProtectionTimer=CONFIG.MERGE.PROTECTION;gameState.enemies.push(merged);increaseCombo();spawnParticles(x,y,CONFIG.ENEMY_LEVELS[merged.level].COLOR,CONFIG.PARTICLE.MERGE_COUNT);spawnRing(x,y,CONFIG.ENEMY_LEVELS[merged.level].COLOR);addFloatingText(x,y,`MERGE → LV.${merged.level}`,CONFIG.ENEMY_LEVELS[merged.level].COLOR);gameState.screenShake=Math.max(gameState.screenShake,CONFIG.SHAKE.MERGE);}
+function damageEnemy(enemy,damage){if(!enemy?.active)return;enemy.hp-=damage;if(enemy.hp<=0)destroyEnemy(enemy);}
+function destroyEnemy(enemy){if(!enemy?.active)return;enemy.active=false;const multiplier=getMultiplier(),points=Math.round(enemy.score*multiplier);gameState.score+=points;increaseCombo();spawnParticles(enemy.x,enemy.y,CONFIG.ENEMY_LEVELS[enemy.level].COLOR,CONFIG.PARTICLE.DESTROY_COUNT);addFloatingText(enemy.x,enemy.y,`+${points}`,CONFIG.COLORS.white);gameState.screenShake=Math.max(gameState.screenShake,CONFIG.SHAKE.DESTROY);if(enemy.level===2)gameState.buffs.fireRate=CONFIG.BUFF.FIRE_RATE_DURATION;if(enemy.level===3)gameState.buffs.pushPower=CONFIG.BUFF.PUSH_POWER_DURATION;if(enemy.level===4)gameState.buffs.penetration=CONFIG.BUFF.PENETRATION_DURATION;}
+function increaseCombo(){gameState.combo++;gameState.comboTimer=CONFIG.COMBO.TIMEOUT;gameState.scoreMultiplier=getMultiplier();}
+function getMultiplier(){return clamp(1+gameState.combo*CONFIG.COMBO.STEP,1,CONFIG.COMBO.MAX_MULTIPLIER);}
+function resetCombo(){gameState.combo=0;gameState.comboTimer=0;gameState.scoreMultiplier=1;}
+function damagePlayer(){const p=gameState.player;if(!p||p.invincible>0||gameState.phase!=='playing')return;p.hp-=CONFIG.PLAYER.BODY_DAMAGE;p.invincible=CONFIG.PLAYER.INVINCIBILITY;resetCombo();gameState.enemyBullets.forEach(b=>{if(b?.active&&squaredDistance(b,p)<=CONFIG.PLAYER.BULLET_CLEAR_RADIUS**2)b.active=false;});spawnParticles(p.x,p.y,CONFIG.COLORS.red,CONFIG.PARTICLE.HIT_COUNT);addFloatingText(p.x,p.y,'HULL HIT',CONFIG.COLORS.red);gameState.screenShake=CONFIG.SHAKE.HIT;if(p.hp<=0)triggerDefeat();}
+function handleEnemyEscape(enemy){if(!enemy?.active)return;enemy.active=false;gameState.defense=Math.max(0,gameState.defense-CONFIG.ENEMY_LEVELS[enemy.level].ESCAPE_DAMAGE);resetCombo();addFloatingText(CONFIG.DEFENSE_LINE_X+25,enemy.y,`BREACH -${CONFIG.ENEMY_LEVELS[enemy.level].ESCAPE_DAMAGE}`,CONFIG.COLORS.red);spawnParticles(CONFIG.DEFENSE_LINE_X,enemy.y,CONFIG.COLORS.red,CONFIG.PARTICLE.HIT_COUNT);gameState.screenShake=CONFIG.SHAKE.HIT;if(gameState.defense<=0)triggerDefeat();}
+function spawnParticles(x,y,color,count){const available=Math.max(0,CONFIG.PARTICLE.MAX-gameState.particles.length);for(let i=0;i<Math.min(count,available);i++){const angle=Math.random()*CONFIG.RENDER.FULL_CIRCLE,speed=random(CONFIG.PARTICLE.SPEED*.25,CONFIG.PARTICLE.SPEED);gameState.particles.push({id:nextId(),active:true,x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,color,size:random(1,CONFIG.PARTICLE.SIZE),life:CONFIG.PARTICLE.LIFE,maxLife:CONFIG.PARTICLE.LIFE,ring:false,radius:0});}}
+function spawnRing(x,y,color){gameState.particles.push({id:nextId(),active:true,x,y,vx:0,vy:0,color,size:CONFIG.RENDER.LINE,life:CONFIG.MERGE.RING_LIFE,maxLife:CONFIG.MERGE.RING_LIFE,ring:true,radius:8});}
+function addFloatingText(x,y,text,color){gameState.floatingTexts.push({id:nextId(),active:true,x,y,text,color,life:CONFIG.TEXT.LIFE,maxLife:CONFIG.TEXT.LIFE});}
+function cleanupEntities(){gameState.enemies=gameState.enemies.filter(e=>e?.active);gameState.pushBullets=gameState.pushBullets.filter(e=>e?.active);gameState.enemyBullets=gameState.enemyBullets.filter(e=>e?.active);gameState.particles=gameState.particles.filter(e=>e?.active&&e.life>0);gameState.floatingTexts=gameState.floatingTexts.filter(e=>e?.active&&e.life>0);const activeIds=new Set(gameState.enemies.map(e=>e.id));for(const id of gameState.mergingEnemyIds)if(!activeIds.has(id))gameState.mergingEnemyIds.delete(id);}
+function triggerClear(){if(gameState.phase!=='playing')return;gameState.result='clear';setPhase('gameover');syncResult();}
+function triggerDefeat(){if(gameState.phase!=='playing')return;gameState.result='defeat';setPhase('gameover');syncResult();}
+function syncResult(){const clear=gameState.result==='clear';gameState.dom['result-kicker'].textContent=clear?'TARGET SCORE ACQUIRED':'MISSION ENDED';gameState.dom['result-title'].textContent=clear?'SECTOR SECURED':'DEFENSE FAILED';gameState.dom['final-score'].textContent=gameState.score.toLocaleString();}
+function syncHud(){const set=(id,value)=>{if(gameState.dom[id])gameState.dom[id].textContent=value;};set('score',String(gameState.score).padStart(6,'0'));set('target-score',String(gameState.targetScore));set('multiplier',`×${getMultiplier().toFixed(1)}`);set('combo',String(gameState.combo));set('hp',gameState.player?'◆ '.repeat(gameState.player.hp).trim():'');set('defense',String(gameState.defense));const remaining=Math.max(0,CONFIG.TIME_LIMIT-gameState.elapsedTime);set('remaining-time',`${String(Math.floor(remaining/CONFIG.TIME.MINUTE)).padStart(CONFIG.TIME.PAD,'0')}:${String(Math.ceil(remaining%CONFIG.TIME.MINUTE)).padStart(CONFIG.TIME.PAD,'0')}`);set('break-cooldown',gameState.breakShot.cooldown<=0?'READY':`${gameState.breakShot.cooldown.toFixed(1)}s`);if(gameState.dom['break-fill'])gameState.dom['break-fill'].style.width=`${(1-gameState.breakShot.cooldown/CONFIG.BREAK.COOLDOWN)*100}%`;const buffs=[];if(gameState.buffs.fireRate>0)buffs.push(`RAPID ${gameState.buffs.fireRate.toFixed(1)}s`);if(gameState.buffs.pushPower>0)buffs.push(`POWER ${gameState.buffs.pushPower.toFixed(1)}s`);if(gameState.buffs.penetration>0)buffs.push(`PIERCE ${gameState.buffs.penetration.toFixed(1)}s`);set('buffs',buffs.join('  //  ')||'STANDARD PUSH');}
 
-  function createStars(){
-    gameState.stars=Array.from({length:CONFIG.starCount},()=>({x:Math.random()*CONFIG.width,y:Math.random()*CONFIG.height,size:CONFIG.render.starMin+Math.random()*CONFIG.render.starRange,depth:randomRange(CONFIG.random.half,CONFIG.render.starRange)}));
-  }
-
-  function createPlayer(){return {id:nextId(),type:'player',active:true,x:CONFIG.player.startX,y:CONFIG.player.startY,targetX:CONFIG.player.startX,targetY:CONFIG.player.startY,radius:CONFIG.player.radius,hitRadius:CONFIG.player.hitRadius,hp:CONFIG.player.maxHp,maxHp:CONFIG.player.maxHp,invincible:0,fireTimer:0,trailTimer:0};}
-
-  function resetGame(){
-    gameState.result=null;gameState.elapsedTime=0;gameState.score=0;gameState.scoreMultiplier=1;gameState.combo=0;gameState.comboTimer=0;
-    gameState.enemies=[];gameState.playerBullets=[];gameState.enemyBullets=[];gameState.cores=[];gameState.particles=[];gameState.floatingTexts=[];
-    gameState.coreTray=[];gameState.activeWeaponLevel=1;gameState.nextCoreLevel=chooseNextCoreLevel();gameState.spawnTimers={enemy:0};gameState.boss=null;gameState.bossSpawned=false;
-    gameState.entityId=CONFIG.ids.start;gameState.player=createPlayer();gameState.input.pointerX=CONFIG.player.startX;gameState.input.pointerY=CONFIG.player.startY;gameState.input.slowMode=false;gameState.input.pointerActive=false;gameState.input.pointerId=CONFIG.input.pointerIdNone;gameState.input.keys.clear();
-    gameState.screenShake=0;gameState.trayShake=0;gameState.weaponFlash=0;gameState.warningFlash=0;gameState.backgroundOffset=0;gameState.gridOffset=0;gameState.lastTimestamp=0;createStars();syncHud();
-  }
-
-  function setPhase(phase){
-    gameState.phase=phase;
-    const start=gameState.dom['start-overlay'];const result=gameState.dom['result-overlay'];
-    if(start)start.classList.toggle('hidden',phase!=='start');
-    if(result)result.classList.toggle('hidden',phase!=='gameover');
-  }
-  function startGame(){resetGame();setPhase('playing');}
-  function restartGame(){startGame();}
-
-  function bindEvents(){
-    const canvas=gameState.dom['game-canvas'];
-    const stop=e=>e.stopPropagation();
-    ['start-button','restart-button'].forEach(id=>{const button=gameState.dom[id];if(button){button.addEventListener('pointerdown',stop);button.addEventListener('click',id==='start-button'?startGame:restartGame);}});
-    if(canvas){
-      canvas.addEventListener('pointermove',event=>handlePointer(event));
-      canvas.addEventListener('pointerdown',event=>{if(gameState.phase!=='playing')return;handlePointer(event);gameState.input.pointerActive=true;gameState.input.pointerId=event.pointerId;gameState.input.slowMode=true;canvas.setPointerCapture(event.pointerId);event.preventDefault();});
-      const release=event=>{if(gameState.phase!=='playing'||event.pointerId!==gameState.input.pointerId)return;gameState.input.pointerActive=false;gameState.input.pointerId=CONFIG.input.pointerIdNone;gameState.input.slowMode=gameState.input.keys.has('ShiftLeft')||gameState.input.keys.has('ShiftRight');};
-      canvas.addEventListener('pointerup',release);canvas.addEventListener('pointercancel',release);
-    }
-    window.addEventListener('keydown',event=>{if(gameState.phase!=='playing')return;const valid=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD','ShiftLeft','ShiftRight'];if(valid.includes(event.code)){gameState.input.keys.add(event.code);gameState.input.slowMode=event.shiftKey||gameState.input.pointerActive;event.preventDefault();}});
-    window.addEventListener('keyup',event=>{gameState.input.keys.delete(event.code);gameState.input.slowMode=gameState.input.pointerActive||gameState.input.keys.has('ShiftLeft')||gameState.input.keys.has('ShiftRight');});
-    window.addEventListener('blur',()=>{gameState.input.keys.clear();gameState.input.slowMode=gameState.input.pointerActive;});
-  }
-
-  function handlePointer(event){
-    if(gameState.phase!=='playing')return;const canvas=gameState.dom['game-canvas'];if(!canvas)return;const rect=canvas.getBoundingClientRect();
-    gameState.input.pointerX=clamp((event.clientX-rect.left)*CONFIG.width/rect.width,CONFIG.player.radius,CONFIG.width-CONFIG.player.radius);
-    gameState.input.pointerY=clamp((event.clientY-rect.top)*CONFIG.height/rect.height,CONFIG.player.radius,CONFIG.height-CONFIG.player.radius);
-  }
-
-  function chooseNextCoreLevel(){return Math.random()<CONFIG.core.nextLevelTwoChance?2:1;}
-  function createEnemy(type,y){const def=CONFIG.enemies[type];if(!def)return null;return {id:nextId(),type,active:true,x:CONFIG.width+def.radius,y,baseY:y,radius:def.radius,width:def.width,height:def.height,hp:def.hp,maxHp:def.hp,speed:def.speed,fireTimer:randomRange(def.fireInterval*CONFIG.random.half,def.fireInterval),age:0};}
-  function spawnEnemyForStage(){
-    if(gameState.elapsedTime>=CONFIG.stage.bossTime)return;let type='scout';if(gameState.elapsedTime>=CONFIG.stage.earlyEnd)type=Math.random()<CONFIG.random.half?'scout':'weaver';
-    const def=CONFIG.enemies[type];const enemy=createEnemy(type,randomRange(def.radius,CONFIG.height-def.radius));if(enemy){if(gameState.elapsedTime>=CONFIG.stage.midEnd)enemy.speed*=CONFIG.stage.lateSpeedScale;gameState.enemies.push(enemy);}
-  }
-  function createBoss(){return {id:nextId(),type:'boss',name:CONFIG.boss.name,active:true,x:CONFIG.width+CONFIG.boss.radius,y:CONFIG.height*CONFIG.random.half,radius:CONFIG.boss.radius,width:CONFIG.boss.width,height:CONFIG.boss.height,hp:CONFIG.boss.hp,maxHp:CONFIG.boss.hp,entered:false,direction:1,pattern:0,patternTime:0,fireTimer:0,thresholds:[...CONFIG.boss.thresholds]};}
-  function createPlayerBullet(x,y,shot){const speed=shot.speed;return {id:nextId(),type:'playerBullet',active:true,x,y,vx:Math.cos(shot.angle)*speed,vy:Math.sin(shot.angle)*speed,radius:shot.penetrating?CONFIG.bullet.penetratingRadius:CONFIG.bullet.playerRadius,damage:shot.damage,penetrating:shot.penetrating,hitIds:new Set()};}
-  function createEnemyBullet(x,y,angle,speed=CONFIG.bullet.enemySpeed){return {id:nextId(),type:'enemyBullet',active:true,x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,radius:CONFIG.bullet.enemyRadius};}
-  function createCore(x,y,level){const def=CONFIG.weapons[level]?.core;if(!def)return null;return {id:nextId(),type:'core',active:true,x,y,vx:-CONFIG.core.driftSpeed,vy:randomRange(-CONFIG.core.driftSpeed*CONFIG.random.half,CONFIG.core.driftSpeed*CONFIG.random.half),radius:def.size,level,score:def.score};}
-
-  function update(dt){
-    if(gameState.phase!=='playing')return;gameState.elapsedTime+=dt;gameState.backgroundOffset+=CONFIG.backgroundSpeed*dt;gameState.gridOffset+=CONFIG.gridSpeed*dt;
-    updatePlayer(dt);updatePlayerFiring(dt);updateStage(dt);updateEnemies(dt);updateBoss(dt);updateBullets(dt);updateCores(dt);updateParticles(dt);updateCombo(dt);checkCollisions();cleanupEntities();syncHud();
-  }
-  function updateStage(dt){
-    if(gameState.elapsedTime>=CONFIG.stage.bossTime&&!gameState.bossSpawned){gameState.bossSpawned=true;gameState.boss=createBoss();return;}
-    if(gameState.elapsedTime>=CONFIG.stage.bossTime)return;gameState.spawnTimers.enemy-=dt;if(gameState.spawnTimers.enemy<=0){spawnEnemyForStage();gameState.spawnTimers.enemy=gameState.elapsedTime<CONFIG.stage.earlyEnd?CONFIG.stage.spawnEarly:gameState.elapsedTime<CONFIG.stage.midEnd?CONFIG.stage.spawnMid:CONFIG.stage.spawnLate;}
-  }
-  function updatePlayer(dt){
-    const p=gameState.player;if(!p||!p.active)return;p.invincible=Math.max(0,p.invincible-dt);p.trailTimer-=dt;
-    let dx=0,dy=0;const keys=gameState.input.keys;if(keys.has('ArrowLeft')||keys.has('KeyA'))dx--;if(keys.has('ArrowRight')||keys.has('KeyD'))dx++;if(keys.has('ArrowUp')||keys.has('KeyW'))dy--;if(keys.has('ArrowDown')||keys.has('KeyS'))dy++;
-    const slow=gameState.input.slowMode?CONFIG.player.slowFactor:1;if(dx||dy){const norm=dx&&dy?CONFIG.keyboard.diagonal:1;p.targetX=clamp(p.x+dx*CONFIG.player.keyboardSpeed*slow*norm*dt,p.radius,CONFIG.width-p.radius);p.targetY=clamp(p.y+dy*CONFIG.player.keyboardSpeed*slow*norm*dt,p.radius,CONFIG.height-p.radius);}else{p.targetX=gameState.input.pointerX;p.targetY=gameState.input.pointerY;}
-    const lerp=clamp(CONFIG.player.moveLerp*slow*dt,0,1);p.x+=(p.targetX-p.x)*lerp;p.y+=(p.targetY-p.y)*lerp;
-    if(p.trailTimer<=0){createParticles(p.x-p.radius,p.y,CONFIG.colors.cyan,1,CONFIG.particle.life*CONFIG.random.half,CONFIG.particle.speed*CONFIG.random.half);p.trailTimer=CONFIG.player.trailInterval;}
-  }
-  function updatePlayerFiring(dt){const p=gameState.player;const weapon=CONFIG.weapons[gameState.activeWeaponLevel];if(!p||!weapon)return;p.fireTimer-=dt;if(p.fireTimer>0)return;weapon.shots.forEach(shot=>gameState.playerBullets.push(createPlayerBullet(p.x+p.radius,p.y+shot.dy,shot)));p.fireTimer=weapon.interval;}
-  function updateEnemies(dt){
-    gameState.enemies.forEach(enemy=>{if(!enemy?.active)return;const def=CONFIG.enemies[enemy.type];if(!def)return;enemy.age+=dt;enemy.x-=enemy.speed*dt;if(enemy.type==='weaver')enemy.y=clamp(enemy.baseY+Math.sin(enemy.age*def.waveFrequency)*def.waveAmplitude,enemy.radius,CONFIG.height-enemy.radius);enemy.fireTimer-=dt;if(enemy.fireTimer<=0){fireEnemy(enemy,def);enemy.fireTimer=def.fireInterval*(gameState.elapsedTime>=CONFIG.stage.midEnd?CONFIG.random.half:1);}if(enemy.x<-CONFIG.worldMargin)enemy.active=false;});
-  }
-  function fireEnemy(enemy,def){const p=gameState.player;if(!p)return;const aimed=Math.atan2(p.y-enemy.y,p.x-enemy.x);if(enemy.type==='scout'){gameState.enemyBullets.push(createEnemyBullet(enemy.x,enemy.y,aimed));return;}[-def.spread,0,def.spread].forEach(offset=>gameState.enemyBullets.push(createEnemyBullet(enemy.x,enemy.y,aimed+offset)));}
-
-  function updateBoss(dt){
-    const boss=gameState.boss;if(!boss?.active)return;if(!boss.entered){boss.x-=CONFIG.boss.entrySpeed*dt;if(boss.x<=CONFIG.boss.targetX){boss.x=CONFIG.boss.targetX;boss.entered=true;}return;}
-    boss.y+=boss.direction*CONFIG.boss.speed*dt;if(boss.y<CONFIG.height*CONFIG.random.half-CONFIG.boss.verticalRange||boss.y>CONFIG.height*CONFIG.random.half+CONFIG.boss.verticalRange)boss.direction*=-1;
-    boss.patternTime+=dt;boss.fireTimer-=dt;if(boss.patternTime>=CONFIG.boss.patternDuration){boss.pattern=(boss.pattern+1)%3;boss.patternTime=0;boss.fireTimer=0;}if(boss.fireTimer>0)return;
-    if(boss.pattern===0){fireBossAimed(boss);boss.fireTimer=CONFIG.boss.aimedInterval;}else if(boss.pattern===1){fireBossFan(boss);boss.fireTimer=CONFIG.boss.fanInterval;}else{fireBossLanes(boss);boss.fireTimer=CONFIG.boss.laneInterval;}
-  }
-  function fireBossAimed(boss){const p=gameState.player;if(!p)return;const base=Math.atan2(p.y-boss.y,p.x-boss.x);for(let i=0;i<CONFIG.boss.aimedBurst;i++){const offset=(i-(CONFIG.boss.aimedBurst-1)*CONFIG.random.half)*CONFIG.boss.burstSpread;gameState.enemyBullets.push(createEnemyBullet(boss.x-boss.radius,boss.y,base+offset));}}
-  function fireBossFan(boss){for(let i=0;i<CONFIG.boss.fanCount;i++){const angle=Math.PI-CONFIG.boss.fanArc*CONFIG.random.half+CONFIG.boss.fanArc*i/(CONFIG.boss.fanCount-1);gameState.enemyBullets.push(createEnemyBullet(boss.x-boss.radius,boss.y,angle));}}
-  function fireBossLanes(boss){const gapIndex=Math.floor(Math.random()*(CONFIG.boss.laneCount-CONFIG.boss.laneGap));for(let i=0;i<CONFIG.boss.laneCount;i++){if(i>=gapIndex&&i<gapIndex+CONFIG.boss.laneGap)continue;const y=(i+CONFIG.random.half)*CONFIG.height/CONFIG.boss.laneCount;gameState.enemyBullets.push(createEnemyBullet(boss.x-boss.radius,y,Math.PI,CONFIG.boss.laneSpeed));}}
-
-  function updateBullets(dt){[gameState.playerBullets,gameState.enemyBullets].forEach(list=>list.forEach(b=>{if(!b?.active)return;b.x+=b.vx*dt;b.y+=b.vy*dt;if(b.x<-CONFIG.worldMargin||b.x>CONFIG.width+CONFIG.worldMargin||b.y<-CONFIG.worldMargin||b.y>CONFIG.height+CONFIG.worldMargin)b.active=false;}));}
-  function updateCores(dt){
-    const p=gameState.player;if(!p)return;gameState.cores.forEach(core=>{if(!core?.active)return;const distance=distanceSquared(core,p);if(distance<CONFIG.core.attractDistance*CONFIG.core.attractDistance){core.vx+=(p.x-core.x)*CONFIG.core.attractStrength*dt;core.vy+=(p.y-core.y)*CONFIG.core.attractStrength*dt;}core.x+=core.vx*dt;core.y+=core.vy*dt;if(core.x<-CONFIG.worldMargin)core.active=false;});
-  }
-  function updateParticles(dt){gameState.particles.forEach(p=>{if(!p)return;p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;p.vx*=1-dt;p.vy*=1-dt;});gameState.floatingTexts.forEach(t=>{if(!t)return;t.y-=CONFIG.text.riseSpeed*dt;t.life-=dt;});gameState.screenShake=Math.max(0,gameState.screenShake-CONFIG.shake.decay*dt);gameState.trayShake=Math.max(0,gameState.trayShake-dt);gameState.weaponFlash=Math.max(0,gameState.weaponFlash-dt);gameState.warningFlash=Math.max(0,gameState.warningFlash-dt);}
-  function updateCombo(dt){if(gameState.combo<=0)return;gameState.comboTimer-=dt;if(gameState.comboTimer<=0){gameState.combo=0;gameState.scoreMultiplier=1;}}
-
-  function checkCollisions(){
-    const p=gameState.player;if(!p)return;
-    gameState.playerBullets.forEach(bullet=>{if(!bullet?.active)return;gameState.enemies.forEach(enemy=>{if(!enemy?.active||!bullet.active||bullet.hitIds.has(enemy.id)||!circlesTouch(bullet,enemy))return;handlePlayerBulletHit(bullet,enemy);});const boss=gameState.boss;if(boss?.active&&bullet.active&&!bullet.hitIds.has(boss.id)&&circlesTouch(bullet,boss))handlePlayerBulletHit(bullet,boss);});
-    gameState.enemyBullets.forEach(bullet=>{if(bullet?.active&&circlesTouch(bullet,p,bullet.radius,p.hitRadius)){bullet.active=false;damagePlayer();}});
-    gameState.enemies.forEach(enemy=>{if(enemy?.active&&circlesTouch(enemy,p,enemy.radius,p.hitRadius)){enemy.active=false;damagePlayer();}});
-    const boss=gameState.boss;if(boss?.active&&circlesTouch(boss,p,boss.radius,p.hitRadius))damagePlayer();
-    gameState.cores.forEach(core=>{if(core?.active&&circlesTouch(core,p,core.radius,p.radius)){collectCore(core);}});
-  }
-  function handlePlayerBulletHit(bullet,target){bullet.hitIds.add(target.id);if(target.type==='boss')damageBoss(bullet.damage);else damageEnemy(target,bullet.damage);if(!bullet.penetrating)bullet.active=false;createParticles(bullet.x,bullet.y,CONFIG.colors.white,CONFIG.particle.smallCount,CONFIG.particle.life,CONFIG.particle.speed);}
-  function damageEnemy(enemy,damage){if(!enemy?.active)return;enemy.hp-=damage;if(enemy.hp<=0)destroyEnemy(enemy);}
-  function destroyEnemy(enemy){enemy.active=false;const def=CONFIG.enemies[enemy.type];if(!def)return;addScore(def.score);increaseCombo(CONFIG.combo.killGain);createParticles(enemy.x,enemy.y,CONFIG.colors.pink,CONFIG.particle.hitCount,CONFIG.particle.life,CONFIG.particle.speed);addFloatingText(enemy.x,enemy.y,`+${Math.round(def.score*gameState.scoreMultiplier)}`,CONFIG.colors.white);if(Math.random()<def.dropChance){const core=createCore(enemy.x,enemy.y,gameState.nextCoreLevel);if(core){gameState.cores.push(core);gameState.nextCoreLevel=chooseNextCoreLevel();}}}
-  function damageBoss(damage){const boss=gameState.boss;if(!boss?.active)return;boss.hp-=damage;addScore(damage*CONFIG.scoring.bossDamageUnit);while(boss.thresholds.length&&boss.hp/boss.maxHp<=boss.thresholds[0]){boss.thresholds.shift();addScore(CONFIG.boss.thresholdScore);const core=createCore(boss.x-boss.radius,boss.y,2);if(core)gameState.cores.push(core);addFloatingText(boss.x-boss.radius,boss.y,'CORE EJECTED',CONFIG.weapons[2].core.color);createParticles(boss.x,boss.y,CONFIG.weapons[2].core.color,CONFIG.particle.mergeCount,CONFIG.particle.life,CONFIG.particle.speed);}if(boss.hp<=0)triggerClear();}
-  function damagePlayer(){const p=gameState.player;if(!p||p.invincible>0||gameState.phase!=='playing')return;p.hp--;p.invincible=CONFIG.player.invincible;gameState.combo=0;gameState.comboTimer=0;gameState.scoreMultiplier=1;gameState.enemyBullets.forEach(b=>{if(b?.active&&distanceSquared(b,p)<=CONFIG.player.clearRadius*CONFIG.player.clearRadius)b.active=false;});gameState.screenShake=CONFIG.shake.hit;createParticles(p.x,p.y,CONFIG.colors.red,CONFIG.particle.hitCount,CONFIG.particle.life,CONFIG.particle.speed);addFloatingText(p.x,p.y,'HULL HIT',CONFIG.colors.red);if(p.hp<=0)triggerDefeat();}
-
-  function collectCore(core){
-    core.active=false;if(gameState.coreTray.length>=CONFIG.core.traySize){triggerCoreRejected(core);return;}gameState.coreTray.push(core.level);addScore(core.score*CONFIG.core.collectionScoreFactor);addFloatingText(core.x,core.y,`CORE ${core.level}`,CONFIG.weapons[core.level].core.color);mergeCoreTray();recalculateWeaponLevel();syncHud();
-  }
-  function mergeCoreTray(){
-    const counts=Array(CONFIG.core.maxLevel+1).fill(0);gameState.coreTray.forEach(level=>{if(level>=1&&level<=CONFIG.core.maxLevel)counts[level]++;});
-    for(let level=1;level<CONFIG.core.maxLevel;level++){const merges=Math.floor(counts[level]/2);counts[level]%=2;counts[level+1]+=merges;for(let i=0;i<merges;i++)applyMerge(level+1);}
-    const rebuilt=[];for(let level=1;level<=CONFIG.core.maxLevel;level++){for(let count=0;count<counts[level];count++)rebuilt.push(level);}gameState.coreTray=rebuilt.slice(0,CONFIG.core.traySize);
-  }
-  function applyMerge(resultLevel){const def=CONFIG.weapons[resultLevel]?.core;if(!def)return;addScore(def.score);increaseCombo(CONFIG.combo.mergeGain);gameState.trayShake=CONFIG.shake.trayTime;gameState.weaponFlash=CONFIG.shake.weaponFlash;gameState.screenShake=Math.max(gameState.screenShake,CONFIG.shake.merge);const p=gameState.player;if(p){createParticles(p.x,p.y,def.color,CONFIG.particle.mergeCount,CONFIG.particle.life,CONFIG.particle.speed);addFloatingText(p.x,p.y-CONFIG.player.radius,`MERGE → LV.${resultLevel}  +${Math.round(def.score*gameState.scoreMultiplier)}`,def.color);}}
-  function recalculateWeaponLevel(){gameState.activeWeaponLevel=gameState.coreTray.length?Math.max(...gameState.coreTray):1;}
-  function triggerCoreRejected(core){gameState.combo=0;gameState.comboTimer=0;gameState.scoreMultiplier=1;gameState.warningFlash=CONFIG.shake.warning;gameState.screenShake=CONFIG.shake.hit;addFloatingText(core.x,core.y,'CORE LOST',CONFIG.colors.red);createParticles(core.x,core.y,CONFIG.colors.red,CONFIG.particle.hitCount,CONFIG.particle.life,CONFIG.particle.speed);}
-  function increaseCombo(gain){gameState.combo++;gameState.comboTimer=CONFIG.combo.timeout;gameState.scoreMultiplier=clamp(gameState.scoreMultiplier+gain,1,CONFIG.combo.maxMultiplier);}
-  function addFloatingText(x,y,text,color){gameState.floatingTexts.push({id:nextId(),type:'text',active:true,x,y,text,color,life:CONFIG.text.life,maxLife:CONFIG.text.life});}
-  function createParticles(x,y,color,count,life,speed){for(let i=0;i<count;i++){const angle=Math.random()*CONFIG.random.fullCircle;const velocity=randomRange(speed*CONFIG.random.half,speed);gameState.particles.push({id:nextId(),type:'particle',active:true,x,y,vx:Math.cos(angle)*velocity,vy:Math.sin(angle)*velocity,color,life,maxLife:life,size:CONFIG.particle.size});}}
-  function triggerClear(){const boss=gameState.boss;if(boss)boss.active=false;gameState.enemyBullets.forEach(b=>{if(b)b.active=false;});addScore(CONFIG.boss.score);if(boss)createParticles(boss.x,boss.y,CONFIG.colors.pink,CONFIG.particle.bossCount,CONFIG.particle.bossLife,CONFIG.particle.bossSpeed);gameState.screenShake=CONFIG.shake.boss;gameState.result='clear';setPhase('gameover');syncResult();}
-  function triggerDefeat(){gameState.result='defeat';setPhase('gameover');syncResult();}
-  function cleanupEntities(){gameState.playerBullets=gameState.playerBullets.filter(e=>e?.active);gameState.enemyBullets=gameState.enemyBullets.filter(e=>e?.active);gameState.enemies=gameState.enemies.filter(e=>e?.active);gameState.cores=gameState.cores.filter(e=>e?.active);gameState.particles=gameState.particles.filter(e=>e?.active&&e.life>0);gameState.floatingTexts=gameState.floatingTexts.filter(e=>e?.active&&e.life>0);}
-
-  function syncHud(){
-    const set=(id,value)=>{const el=gameState.dom[id];if(el)el.textContent=value;};set('score',String(gameState.score).padStart(7,'0'));set('multiplier',`×${gameState.scoreMultiplier.toFixed(1)}`);set('combo',String(gameState.combo));set('hp',gameState.player?'◆ '.repeat(gameState.player.hp).trim():'');set('weapon-level',`LV.${gameState.activeWeaponLevel}`);
-    const remaining=Math.max(0,CONFIG.stage.displayDuration-gameState.elapsedTime);set('stage-time',`${String(Math.floor(remaining/CONFIG.time.minute)).padStart(CONFIG.time.pad,'0')}:${String(Math.floor(remaining%CONFIG.time.minute)).padStart(CONFIG.time.pad,'0')}`);
-    const next=gameState.dom['next-core'];if(next){next.textContent=String(gameState.nextCoreLevel);next.className=`core-token level-${gameState.nextCoreLevel}`;}
-    const tray=gameState.dom['core-tray'];if(tray){const slots=tray.children;for(let i=0;i<CONFIG.core.traySize;i++){const slot=slots[i];if(!slot)continue;const level=gameState.coreTray[i];slot.textContent=level?String(level):'';slot.className=level?'core-slot occupied':'core-slot';slot.style.setProperty('--core',level?CONFIG.weapons[level].core.color:'transparent');}tray.classList.toggle('shake',gameState.trayShake>0);}
-  }
-  function syncResult(){const clear=gameState.result==='clear';const title=gameState.dom['result-title'];const kicker=gameState.dom['result-kicker'];const score=gameState.dom['final-score'];if(title)title.textContent=clear?'STAGE CLEAR':'GAME OVER';if(kicker)kicker.textContent=clear?'CORE CARRIER DESTROYED':'WING SIGNAL LOST';if(score)score.textContent=String(gameState.score).padStart(7,'0');}
-
-  function render(){const ctx=gameState.ctx;if(!ctx)return;ctx.save();const sx=gameState.screenShake?randomRange(-gameState.screenShake,gameState.screenShake):0;const sy=gameState.screenShake?randomRange(-gameState.screenShake,gameState.screenShake):0;ctx.translate(sx,sy);renderBackground(ctx);renderCores(ctx);renderEnemies(ctx);renderBoss(ctx);renderBullets(ctx);renderPlayer(ctx);renderParticles(ctx);renderFloatingTexts(ctx);renderHitbox(ctx);renderBossHealth(ctx);ctx.restore();if(gameState.warningFlash>0){ctx.fillStyle=`rgba(255,40,80,${CONFIG.render.lowHpAlpha})`;ctx.fillRect(0,0,CONFIG.width,CONFIG.height);}const p=gameState.player;if(p&&p.hp===1){ctx.strokeStyle=`rgba(255,50,90,${CONFIG.render.lowHpAlpha+Math.sin(gameState.elapsedTime*CONFIG.player.flashRate)*CONFIG.render.lowHpAlpha})`;ctx.lineWidth=CONFIG.render.glow;ctx.strokeRect(0,0,CONFIG.width,CONFIG.height);}}
-  function renderBackground(ctx){
-    ctx.fillStyle=CONFIG.colors.space;ctx.fillRect(-CONFIG.worldMargin,-CONFIG.worldMargin,CONFIG.width+CONFIG.worldMargin*2,CONFIG.height+CONFIG.worldMargin*2);
-    gameState.stars.forEach(star=>{const x=(star.x-gameState.backgroundOffset*star.depth+CONFIG.width)%CONFIG.width;ctx.fillStyle=`rgba(180,225,255,${CONFIG.random.half+star.depth/CONFIG.render.starRange*CONFIG.random.half})`;ctx.fillRect(x,star.y,star.size,star.size);});
-    const gradient=ctx.createLinearGradient(0,0,CONFIG.width,CONFIG.height);gradient.addColorStop(0,'transparent');gradient.addColorStop(CONFIG.random.half,`rgba(83,58,190,${CONFIG.render.nebulaAlpha})`);gradient.addColorStop(1,'transparent');ctx.fillStyle=gradient;ctx.fillRect(0,CONFIG.height*CONFIG.random.half,CONFIG.width,CONFIG.height*CONFIG.random.half);
-    ctx.strokeStyle=CONFIG.colors.grid;ctx.lineWidth=CONFIG.render.lineWidth/2;ctx.globalAlpha=CONFIG.random.half;for(let x=-(gameState.gridOffset%CONFIG.render.gridGap);x<CONFIG.width;x+=CONFIG.render.gridGap){ctx.beginPath();ctx.moveTo(x,CONFIG.height);ctx.lineTo(CONFIG.width*CONFIG.random.half+(x-CONFIG.width*CONFIG.random.half)*CONFIG.random.half,CONFIG.height*CONFIG.random.half);ctx.stroke();}for(let y=CONFIG.height*CONFIG.random.half;y<CONFIG.height;y+=CONFIG.render.gridGap*CONFIG.random.half){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(CONFIG.width,y);ctx.stroke();}ctx.globalAlpha=1;
-  }
-  function glow(ctx,color,blur=CONFIG.render.glow){ctx.shadowColor=color;ctx.shadowBlur=blur;}
-  function renderPlayer(ctx){const p=gameState.player;if(!p)return;if(p.invincible>0&&Math.floor(p.invincible*CONFIG.player.flashRate)%2===0)ctx.globalAlpha=CONFIG.render.shipFlashAlpha;ctx.save();ctx.translate(p.x,p.y);glow(ctx,CONFIG.colors.cyan,gameState.weaponFlash>0?CONFIG.render.glow*2:CONFIG.render.glow);ctx.fillStyle=CONFIG.colors.cyan;ctx.beginPath();ctx.moveTo(p.radius,0);ctx.lineTo(-p.radius,-CONFIG.player.height/2);ctx.lineTo(-p.radius/2,0);ctx.lineTo(-p.radius,CONFIG.player.height/2);ctx.closePath();ctx.fill();ctx.fillStyle=CONFIG.colors.blue;ctx.fillRect(-p.radius,-CONFIG.player.height/4,p.radius,CONFIG.player.height/2);ctx.fillStyle=CONFIG.colors.white;ctx.beginPath();ctx.arc(0,0,p.hitRadius,0,CONFIG.random.fullCircle);ctx.fill();ctx.restore();ctx.globalAlpha=1;}
-  function renderEnemies(ctx){gameState.enemies.forEach(enemy=>{if(!enemy?.active)return;ctx.save();ctx.translate(enemy.x,enemy.y);glow(ctx,enemy.type==='scout'?CONFIG.colors.orange:CONFIG.colors.pink);ctx.strokeStyle=enemy.type==='scout'?CONFIG.colors.orange:CONFIG.colors.pink;ctx.fillStyle='#14162e';ctx.lineWidth=CONFIG.render.lineWidth;ctx.beginPath();if(enemy.type==='scout'){ctx.moveTo(-enemy.radius,0);ctx.lineTo(0,-enemy.radius);ctx.lineTo(enemy.radius,0);ctx.lineTo(0,enemy.radius);}else{ctx.moveTo(-enemy.radius,0);ctx.lineTo(-enemy.radius/2,-enemy.radius);ctx.lineTo(enemy.radius,-enemy.radius/2);ctx.lineTo(enemy.radius/2,enemy.radius);ctx.lineTo(-enemy.radius/2,enemy.radius);}ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();});}
-  function renderBoss(ctx){const b=gameState.boss;if(!b?.active)return;ctx.save();ctx.translate(b.x,b.y);glow(ctx,CONFIG.colors.boss,CONFIG.render.glow*2);ctx.fillStyle='#1a1232';ctx.strokeStyle=CONFIG.colors.boss;ctx.lineWidth=CONFIG.render.lineWidth*2;ctx.beginPath();ctx.moveTo(-b.radius,0);ctx.lineTo(-b.radius/2,-b.height/2);ctx.lineTo(b.radius/2,-b.height/2);ctx.lineTo(b.radius,0);ctx.lineTo(b.radius/2,b.height/2);ctx.lineTo(-b.radius/2,b.height/2);ctx.closePath();ctx.fill();ctx.stroke();ctx.strokeStyle=CONFIG.colors.cyan;ctx.beginPath();ctx.arc(0,0,b.radius*CONFIG.random.half,0,CONFIG.random.fullCircle);ctx.stroke();ctx.fillStyle=CONFIG.colors.white;ctx.beginPath();ctx.arc(-b.radius*CONFIG.random.half,0,CONFIG.bullet.penetratingRadius,0,CONFIG.random.fullCircle);ctx.fill();ctx.restore();}
-  function renderBullets(ctx){gameState.playerBullets.forEach(b=>{if(!b?.active)return;ctx.save();glow(ctx,b.penetrating?CONFIG.colors.pink:CONFIG.colors.cyan);ctx.fillStyle=b.penetrating?CONFIG.colors.pink:CONFIG.colors.white;ctx.fillRect(b.x-b.radius,b.y-b.radius*CONFIG.random.half,b.radius*2,b.radius);ctx.restore();});gameState.enemyBullets.forEach(b=>{if(!b?.active)return;ctx.save();glow(ctx,CONFIG.colors.red);ctx.fillStyle=CONFIG.colors.red;ctx.beginPath();ctx.arc(b.x,b.y,b.radius,0,CONFIG.random.fullCircle);ctx.fill();ctx.restore();});}
-  function renderCores(ctx){gameState.cores.forEach(core=>{if(!core?.active)return;const def=CONFIG.weapons[core.level]?.core;if(!def)return;ctx.save();ctx.translate(core.x,core.y);glow(ctx,def.color,CONFIG.render.glow+core.level);ctx.fillStyle='#071126';ctx.strokeStyle=def.color;ctx.lineWidth=CONFIG.render.lineWidth;ctx.beginPath();ctx.arc(0,0,core.radius,0,CONFIG.random.fullCircle);ctx.fill();ctx.stroke();ctx.rotate(gameState.elapsedTime*CONFIG.core.orbitSpeed);ctx.beginPath();ctx.arc(0,0,core.radius+CONFIG.render.coreRingGap,0,Math.PI);ctx.stroke();ctx.fillStyle=def.color;ctx.beginPath();ctx.arc(core.radius+CONFIG.render.coreRingGap,0,CONFIG.particle.size,0,CONFIG.random.fullCircle);ctx.fill();ctx.rotate(-gameState.elapsedTime*CONFIG.core.orbitSpeed);ctx.fillStyle=CONFIG.colors.white;ctx.font=`700 ${CONFIG.render.fontMedium}px Orbitron`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(core.level),0,0);ctx.restore();});}
-  function renderParticles(ctx){gameState.particles.forEach(p=>{if(!p||p.life<=0)return;ctx.globalAlpha=clamp(p.life/p.maxLife,0,1);ctx.fillStyle=p.color;ctx.fillRect(p.x-p.size*CONFIG.random.half,p.y-p.size*CONFIG.random.half,p.size,p.size);});ctx.globalAlpha=1;}
-  function renderFloatingTexts(ctx){ctx.textAlign='center';ctx.font=`700 ${CONFIG.render.fontMedium}px Orbitron`;gameState.floatingTexts.forEach(t=>{if(!t||t.life<=0)return;ctx.globalAlpha=clamp(t.life/t.maxLife,0,1);ctx.fillStyle=t.color;glow(ctx,t.color);ctx.fillText(t.text,t.x,t.y);});ctx.globalAlpha=1;ctx.shadowBlur=0;}
-  function renderHitbox(ctx){const p=gameState.player;if(!p||!gameState.input.slowMode)return;ctx.save();glow(ctx,CONFIG.colors.white);ctx.strokeStyle=CONFIG.colors.white;ctx.lineWidth=CONFIG.render.lineWidth;ctx.beginPath();ctx.arc(p.x,p.y,p.hitRadius,0,CONFIG.random.fullCircle);ctx.stroke();ctx.restore();}
-  function renderBossHealth(ctx){const b=gameState.boss;if(!b?.active)return;ctx.fillStyle='#090c1f';ctx.fillRect(CONFIG.render.bossBarX,CONFIG.render.bossBarY,CONFIG.render.bossBarWidth,CONFIG.render.bossBarHeight);ctx.fillStyle=CONFIG.colors.boss;ctx.fillRect(CONFIG.render.bossBarX,CONFIG.render.bossBarY,CONFIG.render.bossBarWidth*clamp(b.hp/b.maxHp,0,1),CONFIG.render.bossBarHeight);ctx.strokeStyle=CONFIG.colors.white;ctx.strokeRect(CONFIG.render.bossBarX,CONFIG.render.bossBarY,CONFIG.render.bossBarWidth,CONFIG.render.bossBarHeight);ctx.fillStyle=CONFIG.colors.white;ctx.font=`700 ${CONFIG.render.fontSmall}px Orbitron`;ctx.textAlign='center';ctx.fillText(`${b.name}  ${Math.max(0,Math.ceil(b.hp))} / ${b.maxHp}`,CONFIG.width*CONFIG.random.half,CONFIG.render.bossBarY-CONFIG.render.fontSmall/2);}
-
-  function gameLoop(timestamp){const dt=gameState.lastTimestamp?Math.min((timestamp-gameState.lastTimestamp)/1000,CONFIG.maxDelta):0;gameState.lastTimestamp=timestamp;if(gameState.phase==='playing')update(dt);render();gameState.animationFrame=requestAnimationFrame(gameLoop);}
-  function initialize(){cacheDom();bindEvents();resetGame();setPhase('start');if(gameState.animationFrame===null)gameState.animationFrame=requestAnimationFrame(gameLoop);}
-  return Object.freeze({initialize});
-})();
-
-document.addEventListener('DOMContentLoaded',game.initialize,{once:true});
+function render(){const ctx=gameState.ctx;if(!ctx)return;ctx.save();ctx.clearRect(0,0,CONFIG.WIDTH,CONFIG.HEIGHT);if(gameState.screenShake>0)ctx.translate(random(-gameState.screenShake,gameState.screenShake),random(-gameState.screenShake,gameState.screenShake));renderBackground(ctx);renderDefenseLine(ctx);renderPushBullets(ctx);renderEnemyBullets(ctx);renderEnemies(ctx);renderPlayer(ctx);renderBreakShot(ctx);renderParticles(ctx);renderFloatingTexts(ctx);renderHudEffects(ctx);ctx.restore();}
+function renderBackground(ctx){ctx.fillStyle=CONFIG.COLORS.space;ctx.fillRect(0,0,CONFIG.WIDTH,CONFIG.HEIGHT);const glow=ctx.createRadialGradient(CONFIG.WIDTH*.7,CONFIG.HEIGHT*.35,0,CONFIG.WIDTH*.7,CONFIG.HEIGHT*.35,CONFIG.WIDTH*.65);glow.addColorStop(0,'#15285a');glow.addColorStop(1,'#03061900');ctx.fillStyle=glow;ctx.fillRect(0,0,CONFIG.WIDTH,CONFIG.HEIGHT);ctx.fillStyle=CONFIG.COLORS.white;gameState.stars.forEach(s=>{const x=(s.x-gameState.backgroundOffset*s.depth+CONFIG.WIDTH)%CONFIG.WIDTH;ctx.globalAlpha=.35+s.depth*.55;ctx.fillRect(x,s.y,s.size,s.size);});ctx.globalAlpha=1;ctx.strokeStyle=CONFIG.COLORS.grid;ctx.globalAlpha=.42;ctx.lineWidth=1;const horizon=CONFIG.BACKGROUND.GRID_HORIZON;for(let x=-CONFIG.WIDTH;x<CONFIG.WIDTH*2;x+=CONFIG.BACKGROUND.GRID_GAP){ctx.beginPath();ctx.moveTo(CONFIG.WIDTH*.5,horizon);ctx.lineTo(x,CONFIG.HEIGHT);ctx.stroke();}const offset=(gameState.backgroundOffset*CONFIG.BACKGROUND.GRID_SPEED/CONFIG.BACKGROUND.STAR_SPEED)%CONFIG.BACKGROUND.GRID_GAP;for(let y=horizon+CONFIG.BACKGROUND.GRID_GAP-offset;y<CONFIG.HEIGHT;y+=CONFIG.BACKGROUND.GRID_GAP){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(CONFIG.WIDTH,y);ctx.stroke();}ctx.globalAlpha=1;}
+function renderDefenseLine(ctx){ctx.save();ctx.strokeStyle=CONFIG.COLORS.cyan;ctx.shadowColor=CONFIG.COLORS.cyan;ctx.shadowBlur=CONFIG.RENDER.GLOW;ctx.setLineDash([9,8]);ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(CONFIG.DEFENSE_LINE_X,0);ctx.lineTo(CONFIG.DEFENSE_LINE_X,CONFIG.HEIGHT);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=CONFIG.COLORS.cyan;ctx.font='700 11px ui-monospace';ctx.translate(CONFIG.DEFENSE_LINE_X-9,CONFIG.HEIGHT*.5);ctx.rotate(-Math.PI*.5);ctx.fillText('DEFENSE LINE',0,0);ctx.restore();}
+function renderPlayer(ctx){const p=gameState.player;if(!p)return;if(p.invincible>0&&Math.floor(p.invincible/CONFIG.PLAYER.FLASH_INTERVAL)%2===0)return;ctx.save();ctx.translate(p.x,p.y);ctx.shadowColor=CONFIG.COLORS.cyan;ctx.shadowBlur=CONFIG.RENDER.GLOW;ctx.fillStyle=CONFIG.COLORS.cyan;ctx.beginPath();ctx.moveTo(p.radius,0);ctx.lineTo(-p.radius,-p.radius*.7);ctx.lineTo(-p.radius*.5,0);ctx.lineTo(-p.radius,p.radius*.7);ctx.closePath();ctx.fill();ctx.fillStyle=CONFIG.COLORS.white;ctx.fillRect(-3,-3,9,6);ctx.restore();if(gameState.input.slowMode)renderHitbox(ctx);}
+function renderHitbox(ctx){const p=gameState.player;if(!p)return;ctx.save();ctx.strokeStyle=CONFIG.COLORS.white;ctx.shadowColor=CONFIG.COLORS.cyan;ctx.shadowBlur=10;ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,p.hitRadius,0,CONFIG.RENDER.FULL_CIRCLE);ctx.stroke();ctx.restore();}
+function renderPushBullets(ctx){ctx.save();ctx.strokeStyle=CONFIG.COLORS.cyan;ctx.shadowColor=CONFIG.COLORS.cyan;ctx.shadowBlur=12;ctx.lineWidth=4;gameState.pushBullets.forEach(b=>{ctx.beginPath();ctx.moveTo(b.x-15,b.y);ctx.lineTo(b.x+5,b.y);ctx.stroke();});ctx.restore();}
+function renderEnemyBullets(ctx){ctx.save();ctx.fillStyle=CONFIG.COLORS.pink;ctx.shadowColor=CONFIG.COLORS.pink;ctx.shadowBlur=12;gameState.enemyBullets.forEach(b=>{ctx.beginPath();ctx.arc(b.x,b.y,b.radius,0,CONFIG.RENDER.FULL_CIRCLE);ctx.fill();});ctx.restore();}
+function renderEnemies(ctx){gameState.enemies.forEach(e=>{const def=CONFIG.ENEMY_LEVELS[e.level];ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.age*(e.level%2?1:-1));ctx.strokeStyle=def.COLOR;ctx.fillStyle=`${def.COLOR}22`;ctx.shadowColor=def.COLOR;ctx.shadowBlur=CONFIG.RENDER.GLOW+(e.level===4?Math.sin(e.age*CONFIG.RENDER.WARNING_PULSE)*8:0);ctx.lineWidth=2+e.level*.5;polygon(ctx,e.radius,CONFIG.RENDER.ENEMY_SIDES+e.level);ctx.fill();ctx.stroke();for(let ring=1;ring<e.level;ring++){ctx.rotate(.35);ctx.beginPath();ctx.arc(0,0,e.radius*(.35+ring*.14),0,CONFIG.RENDER.FULL_CIRCLE);ctx.stroke();}ctx.fillStyle=def.COLOR;ctx.beginPath();ctx.arc(0,0,3+e.level*2,0,CONFIG.RENDER.FULL_CIRCLE);ctx.fill();ctx.rotate(-e.age*(e.level%2?1:-1));ctx.fillStyle='#071020';ctx.fillRect(-e.radius,-e.radius-9,e.radius*2,4);ctx.fillStyle=def.COLOR;ctx.fillRect(-e.radius,-e.radius-9,e.radius*2*clamp(e.hp/e.maxHp,0,1),4);ctx.restore();});}
+function polygon(ctx,radius,sides){ctx.beginPath();for(let i=0;i<sides;i++){const angle=i/sides*CONFIG.RENDER.FULL_CIRCLE-Math.PI*.5,px=Math.cos(angle)*radius,py=Math.sin(angle)*radius;if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);}ctx.closePath();}
+function renderBreakShot(ctx){const p=gameState.player,s=gameState.breakShot;if(!p||!s.active)return;const alpha=clamp(s.timer/CONFIG.BREAK.DURATION,0,1),gradient=ctx.createLinearGradient(p.x,p.y,CONFIG.WIDTH,p.y);gradient.addColorStop(0,CONFIG.COLORS.white);gradient.addColorStop(.4,CONFIG.COLORS.cyan);gradient.addColorStop(1,'#42f5ff00');ctx.save();ctx.globalAlpha=.5+alpha*.5;ctx.strokeStyle=gradient;ctx.shadowColor=CONFIG.COLORS.cyan;ctx.shadowBlur=30;ctx.lineWidth=CONFIG.BREAK.HALF_HEIGHT*(.7+alpha);ctx.beginPath();ctx.moveTo(p.x+CONFIG.BREAK.START_OFFSET,p.y);ctx.lineTo(CONFIG.WIDTH-CONFIG.BREAK.END_MARGIN,p.y);ctx.stroke();ctx.lineWidth=3;ctx.strokeStyle=CONFIG.COLORS.white;ctx.stroke();ctx.restore();}
+function renderParticles(ctx){gameState.particles.forEach(p=>{ctx.save();ctx.globalAlpha=clamp(p.life/p.maxLife,0,1);ctx.strokeStyle=p.color;ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=8;if(p.ring){ctx.lineWidth=p.size;ctx.beginPath();ctx.arc(p.x,p.y,p.radius,0,CONFIG.RENDER.FULL_CIRCLE);ctx.stroke();}else{ctx.fillRect(p.x,p.y,p.size,p.size);}ctx.restore();});}
+function renderFloatingTexts(ctx){ctx.save();ctx.textAlign='center';ctx.font='700 15px ui-monospace';gameState.floatingTexts.forEach(t=>{ctx.globalAlpha=clamp(t.life/t.maxLife,0,1);ctx.fillStyle=t.color;ctx.shadowColor=t.color;ctx.shadowBlur=8;ctx.fillText(t.text,t.x,t.y);});ctx.restore();}
+function renderHudEffects(ctx){if(gameState.phase!=='playing')return;const progress=clamp(gameState.score/gameState.targetScore,0,1);ctx.fillStyle='#050918bb';ctx.fillRect(CONFIG.WIDTH*.25,12,CONFIG.WIDTH*.5,8);ctx.fillStyle=CONFIG.COLORS.cyan;ctx.fillRect(CONFIG.WIDTH*.25,12,CONFIG.WIDTH*.5*progress,8);ctx.strokeStyle=CONFIG.COLORS.white;ctx.strokeRect(CONFIG.WIDTH*.25,12,CONFIG.WIDTH*.5,8);}
+function gameLoop(timestamp){const dt=gameState.lastTimestamp?Math.min((timestamp-gameState.lastTimestamp)/1000,CONFIG.MAX_DELTA):0;gameState.lastTimestamp=timestamp;if(gameState.phase==='playing')update(dt);render();gameState.animationFrame=requestAnimationFrame(gameLoop);}
+function initialize(){cacheDom();resetGame();bindEvents();setPhase('start');gameState.animationFrame=requestAnimationFrame(gameLoop);}
+document.addEventListener('DOMContentLoaded',initialize,{once:true});

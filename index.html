@@ -1,52 +1,126 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#030615">
-  <title>MERGE WING — Capture the Barrage</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <main class="cabinet" aria-labelledby="game-title">
-    <header class="topbar">
-      <div class="brand"><small>COUNTER-BARRAGE SYSTEM</small><h1 id="game-title">MERGE WING</h1></div>
-      <div class="score-block"><small>SCORE</small><strong id="score">000000</strong></div>
-    </header>
-    <section class="hud" aria-label="Game status">
-      <div><small>HULL</small><strong id="hp">◆ ◆ ◆</strong></div>
-      <div><small>STAGE TIME</small><strong id="stage-time">00:00</strong></div>
-      <div><small>CAPTURED</small><strong><span id="captured-count">0</span> / 6</strong></div>
-      <div><small>HIGHEST</small><strong id="highest-level">—</strong></div>
-      <div class="cyan"><small>CYAN</small><strong id="cyan-count">0</strong></div>
-      <div class="magenta"><small>MAGENTA</small><strong id="magenta-count">0</strong></div>
-    </section>
-    <section id="boss-hud" class="boss-hud hidden" aria-label="Boss health">
-      <div><small>PRISM FORTRESS</small><strong id="boss-health-text">100%</strong></div>
-      <i><span id="boss-health-fill"></span></i>
-    </section>
-    <section class="screen">
-      <canvas id="game-canvas" width="960" height="540" aria-label="MERGE WING horizontal bullet hell game"></canvas>
-      <section id="start-overlay" class="overlay">
-        <div class="card">
-          <p class="eyebrow">WEAPONIZE THE BARRAGE</p>
-          <h2>CAPTURE. MERGE. RETURN.</h2>
-          <p>Focus your field into incoming fire. Matching captured rounds fuse in orbit—hold them for power, or launch them before the orbit becomes a target.</p>
-          <div class="instructions"><span><b>MOVE</b> Pointer / WASD</span><span><b>CAPTURE</b> Hold primary / Shift</span><span><b>COUNTER</b> Space / secondary</span></div>
-          <button id="start-button" type="button">ENGAGE</button>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#030615" />
+    <title>MERGE WING — Capture the Barrage</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="cabinet" aria-labelledby="game-title">
+      <header class="topbar">
+        <div class="brand">
+          <small>COUNTER-BARRAGE SYSTEM</small>
+          <h1 id="game-title">MERGE WING</h1>
+        </div>
+        <div class="score-block">
+          <small>SCORE</small><strong id="score">000000</strong>
+        </div>
+      </header>
+      <section class="hud" aria-label="Game status">
+        <div><small>HULL</small><strong id="hp">◆ ◆ ◆</strong></div>
+        <div>
+          <small>STAGE TIME</small><strong id="stage-time">00:00</strong>
+        </div>
+        <div>
+          <small>CAPTURED</small
+          ><strong><span id="captured-count">0</span> / 6</strong>
+        </div>
+        <div><small>HIGHEST</small><strong id="highest-level">—</strong></div>
+        <div class="cyan">
+          <small>CYAN</small><strong id="cyan-count">0</strong>
+        </div>
+        <div class="magenta">
+          <small>MAGENTA</small><strong id="magenta-count">0</strong>
         </div>
       </section>
-      <section id="result-overlay" class="overlay hidden" aria-live="assertive">
-        <div class="card">
-          <p id="result-kicker" class="eyebrow">MISSION COMPLETE</p>
-          <h2 id="result-title">FORTRESS SHATTERED</h2>
-          <small>FINAL SCORE</small><strong id="final-score" class="final-score">0</strong>
-          <button id="restart-button" type="button">RESTART</button>
+      <section id="boss-hud" class="boss-hud hidden" aria-label="Boss health">
+        <div>
+          <small>PRISM FORTRESS</small
+          ><strong id="boss-health-text">100%</strong>
         </div>
+        <i><span id="boss-health-fill"></span></i>
       </section>
-    </section>
-    <footer><b>CAPTURE</b> slows movement • matching rounds merge automatically • orbiting rounds can be destroyed • counters spend the highest level first</footer>
-  </main>
-  <script src="game.js"></script>
-</body>
+      <section class="screen">
+        <canvas
+          id="game-canvas"
+          width="960"
+          height="540"
+          aria-label="MERGE WING horizontal bullet hell game"
+        ></canvas>
+        <aside
+          class="selected-counter"
+          aria-live="polite"
+          aria-label="Selected counter"
+        >
+          <small>SELECTED <span id="selected-slot">0 / 0</span></small>
+          <strong id="selected-color-level">EMPTY</strong>
+          <b id="selected-family">CAPTURE ENEMY FIRE</b>
+          <span id="selected-effect">Q / E TO SELECT</span>
+        </aside>
+        <nav class="touch-controls" aria-label="Captured bullet controls">
+          <button
+            id="select-prev"
+            type="button"
+            aria-label="Select previous captured bullet"
+          >
+            ◀
+          </button>
+          <button
+            id="throw-button"
+            type="button"
+            aria-label="Throw selected captured bullet"
+          >
+            THROW
+          </button>
+          <button
+            id="select-next"
+            type="button"
+            aria-label="Select next captured bullet"
+          >
+            ▶
+          </button>
+        </nav>
+        <section id="start-overlay" class="overlay">
+          <div class="card">
+            <p class="eyebrow">WEAPONIZE THE BARRAGE</p>
+            <h2>CAPTURE. MERGE. RETURN.</h2>
+            <p>
+              Focus your field into incoming fire. Matching captured rounds fuse
+              in orbit—hold them for power, or launch them before the orbit
+              becomes a target.
+            </p>
+            <div class="instructions">
+              <span><b>MOVE</b> Pointer / WASD</span
+              ><span><b>CAPTURE</b> Hold primary / Shift</span
+              ><span><b>SELECT</b> Q / E / Wheel / 1–6</span
+              ><span><b>AIM</b> Pointer</span
+              ><span><b>THROW</b> Space / secondary</span>
+            </div>
+            <button id="start-button" type="button">ENGAGE</button>
+          </div>
+        </section>
+        <section
+          id="result-overlay"
+          class="overlay hidden"
+          aria-live="assertive"
+        >
+          <div class="card">
+            <p id="result-kicker" class="eyebrow">MISSION COMPLETE</p>
+            <h2 id="result-title">FORTRESS SHATTERED</h2>
+            <small>FINAL SCORE</small
+            ><strong id="final-score" class="final-score">0</strong>
+            <button id="restart-button" type="button">RESTART</button>
+          </div>
+        </section>
+      </section>
+      <footer>
+        <b>CAPTURE</b> slows movement • matching rounds merge automatically •
+        orbiting rounds can be destroyed • select counters with <b>Q / E</b> or
+        wheel • <b>CYAN</b> attacks • <b>MAGENTA</b> controls space
+      </footer>
+    </main>
+    <script src="game.js"></script>
+  </body>
 </html>

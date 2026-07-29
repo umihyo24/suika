@@ -29,10 +29,10 @@
         </div>
         <div><small>HIGHEST</small><strong id="highest-level">—</strong></div>
         <div class="cyan">
-          <small>CYAN</small><strong id="cyan-count">0</strong>
+          <small>BLUE / LANCE</small><strong id="blue-count">0</strong>
         </div>
         <div class="magenta">
-          <small>MAGENTA</small><strong id="magenta-count">0</strong>
+          <small>RED / BOMB</small><strong id="red-count">0</strong>
         </div>
       </section>
       <section id="boss-hud" class="boss-hud hidden" aria-label="Boss health">
@@ -68,11 +68,11 @@
             ◀
           </button>
           <button
-            id="throw-button"
+            id="use-button"
             type="button"
-            aria-label="Throw selected captured bullet"
+            aria-label="Use selected captured bullet"
           >
-            THROW
+            USE
           </button>
           <button
             id="select-next"
@@ -95,8 +95,7 @@
               <span><b>MOVE</b> Pointer / WASD</span
               ><span><b>CAPTURE</b> Hold primary / Shift</span
               ><span><b>SELECT</b> Q / E / Wheel / 1–6</span
-              ><span><b>AIM</b> Pointer</span
-              ><span><b>THROW</b> Space / secondary</span>
+              ><span><b>USE</b> Space / secondary</span>
             </div>
             <button id="start-button" type="button">ENGAGE</button>
           </div>
@@ -118,7 +117,8 @@
       <footer>
         <b>CAPTURE</b> slows movement • matching rounds merge automatically •
         orbiting rounds can be destroyed • select counters with <b>Q / E</b> or
-        wheel • <b>CYAN</b> attacks • <b>MAGENTA</b> controls space
+        wheel • <b>BLUE LANCE</b> attacks forward • <b>RED BOMB</b> controls
+        space
       </footer>
     </main>
     <script src="game.js"></script>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10182f">
+  <title>Monster Merge Drop</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="game-shell" aria-labelledby="game-title">
+    <header class="game-header">
+      <div>
+        <p class="eyebrow">Physics puzzle</p>
+        <h1 id="game-title">Monster Merge Drop</h1>
+      </div>
+      <section class="status-panel" aria-label="Game status">
+        <div class="score-box">
+          <span>Score</span>
+          <strong id="score" aria-live="polite">0</strong>
+        </div>
+        <div class="next-box">
+          <span>Next</span>
+          <canvas id="next-preview" width="64" height="64" aria-label="Next monster preview"></canvas>
+        </div>
+      </section>
+    </header>
+
+    <section class="play-area" aria-label="Monster Merge Drop game">
+      <canvas id="game-canvas" width="480" height="720" aria-label="Merge drop game board"></canvas>
+
+      <section id="start-overlay" class="overlay" aria-labelledby="start-heading">
+        <div class="overlay-card">
+          <p class="overlay-icon" aria-hidden="true">● + ●</p>
+          <h2 id="start-heading">Build the biggest monster</h2>
+          <p>Aim, drop, and combine matching monsters before the stack reaches the danger line.</p>
+          <button id="start-button" type="button">Start game</button>
+        </div>
+      </section>
+
+      <section id="gameover-overlay" class="overlay is-hidden" aria-labelledby="gameover-heading">
+        <div class="overlay-card">
+          <p class="eyebrow">Run complete</p>
+          <h2 id="gameover-heading">Game over</h2>
+          <p class="final-label">Final score</p>
+          <strong id="final-score" class="final-score">0</strong>
+          <button id="restart-button" type="button">Play again</button>
+        </div>
+      </section>
+    </section>
+
+    <p class="controls"><strong>How to play:</strong> Move your pointer or finger to aim, then click or tap to drop. Match equal levels to merge them.</p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

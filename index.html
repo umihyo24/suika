@@ -1,126 +1,58 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="theme-color" content="#030615" />
-    <title>MERGE WING — Capture the Barrage</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <main class="cabinet" aria-labelledby="game-title">
-      <header class="topbar">
-        <div class="brand">
-          <small>COUNTER-BARRAGE SYSTEM</small>
-          <h1 id="game-title">MERGE WING</h1>
-        </div>
-        <div class="score-block">
-          <small>SCORE</small><strong id="score">000000</strong>
-        </div>
-      </header>
-      <section class="hud" aria-label="Game status">
-        <div><small>HULL</small><strong id="hp">◆ ◆ ◆</strong></div>
-        <div>
-          <small>STAGE TIME</small><strong id="stage-time">00:00</strong>
-        </div>
-        <div>
-          <small>CAPTURED</small
-          ><strong><span id="captured-count">0</span> / 6</strong>
-        </div>
-        <div><small>HIGHEST</small><strong id="highest-level">—</strong></div>
-        <div class="cyan">
-          <small>BLUE / LANCE</small><strong id="blue-count">0</strong>
-        </div>
-        <div class="magenta">
-          <small>RED / BOMB</small><strong id="red-count">0</strong>
-        </div>
-      </section>
-      <section id="boss-hud" class="boss-hud hidden" aria-label="Boss health">
-        <div>
-          <small>PRISM FORTRESS</small
-          ><strong id="boss-health-text">100%</strong>
-        </div>
-        <i><span id="boss-health-fill"></span></i>
-      </section>
-      <section class="screen">
-        <canvas
-          id="game-canvas"
-          width="960"
-          height="540"
-          aria-label="MERGE WING horizontal bullet hell game"
-        ></canvas>
-        <aside
-          class="selected-counter"
-          aria-live="polite"
-          aria-label="Selected counter"
-        >
-          <small>SELECTED <span id="selected-slot">0 / 0</span></small>
-          <strong id="selected-color-level">EMPTY</strong>
-          <b id="selected-family">CAPTURE ENEMY FIRE</b>
-          <span id="selected-effect">Q / E TO SELECT</span>
-        </aside>
-        <nav class="touch-controls" aria-label="Captured bullet controls">
-          <button
-            id="select-prev"
-            type="button"
-            aria-label="Select previous captured bullet"
-          >
-            ◀
-          </button>
-          <button
-            id="use-button"
-            type="button"
-            aria-label="Use selected captured bullet"
-          >
-            USE
-          </button>
-          <button
-            id="select-next"
-            type="button"
-            aria-label="Select next captured bullet"
-          >
-            ▶
-          </button>
-        </nav>
-        <section id="start-overlay" class="overlay">
-          <div class="card">
-            <p class="eyebrow">WEAPONIZE THE BARRAGE</p>
-            <h2>CAPTURE. MERGE. RETURN.</h2>
-            <p>
-              Focus your field into incoming fire. Matching captured rounds fuse
-              in orbit—hold them for power, or launch them before the orbit
-              becomes a target.
-            </p>
-            <div class="instructions">
-              <span><b>MOVE</b> Pointer / WASD</span
-              ><span><b>CAPTURE</b> Hold primary / Shift</span
-              ><span><b>SELECT</b> Q / E / Wheel / 1–6</span
-              ><span><b>USE</b> Space / secondary</span>
-            </div>
-            <button id="start-button" type="button">ENGAGE</button>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07101c">
+  <title>CATCH BACK</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="game-shell" aria-labelledby="game-title">
+    <header class="masthead">
+      <div class="brand"><span>COUNTER SPORT / 01</span><h1 id="game-title">CATCH <em>BACK</em></h1></div>
+      <div class="mission"><span>DRILL</span><strong>RETURN PROTOCOL</strong></div>
+    </header>
+
+    <section class="hud" aria-label="Game status">
+      <div><span>SCORE</span><strong id="score">000000</strong></div>
+      <div><span>COMBO</span><strong id="combo">—</strong></div>
+      <div><span>HP</span><strong id="hp">● ● ● ●</strong></div>
+      <div><span>HAND</span><strong id="held">EMPTY</strong></div>
+      <div><span>CLEARED</span><strong id="progress">0 / 10</strong></div>
+    </section>
+
+    <section class="screen" id="screen">
+      <canvas id="game-canvas" width="960" height="540" aria-label="CATCH BACK action game"></canvas>
+
+      <section id="start-overlay" class="overlay">
+        <div class="panel">
+          <p class="eyebrow">NO BALL. NO ATTACK.</p>
+          <h2>CATCH IT.<br><i>GIVE IT BACK.</i></h2>
+          <p class="lead">Read the throw, snap into your catch window, then return fire. A perfect catch unlocks a devastating Return Rush.</p>
+          <div class="controls">
+            <div><kbd>WASD</kbd><kbd>ARROWS</kbd><span>MOVE</span></div>
+            <div><kbd>SHIFT</kbd><kbd>PRIMARY</kbd><span>HOLD TO CATCH</span></div>
+            <div><kbd>SPACE</kbd><kbd>SECONDARY</kbd><span>RETURN</span></div>
           </div>
-        </section>
-        <section
-          id="result-overlay"
-          class="overlay hidden"
-          aria-live="assertive"
-        >
-          <div class="card">
-            <p id="result-kicker" class="eyebrow">MISSION COMPLETE</p>
-            <h2 id="result-title">FORTRESS SHATTERED</h2>
-            <small>FINAL SCORE</small
-            ><strong id="final-score" class="final-score">0</strong>
-            <button id="restart-button" type="button">RESTART</button>
-          </div>
-        </section>
+          <button id="start-button" type="button">START DRILL <b>→</b></button>
+          <small>Catch late for <strong>JUST CATCH</strong> · You are vulnerable while returning</small>
+        </div>
       </section>
-      <footer>
-        <b>CAPTURE</b> slows movement • matching rounds merge automatically •
-        orbiting rounds can be destroyed • select counters with <b>Q / E</b> or
-        wheel • <b>BLUE LANCE</b> attacks forward • <b>RED BOMB</b> controls
-        space
-      </footer>
-    </main>
-    <script src="game.js"></script>
-  </body>
+
+      <section id="result-overlay" class="overlay hidden" aria-live="assertive">
+        <div class="panel result-panel">
+          <p id="result-kicker" class="eyebrow">DRILL COMPLETE</p>
+          <h2 id="result-title">CLEAR</h2>
+          <span>FINAL SCORE</span>
+          <strong id="final-score" class="final-score">000000</strong>
+          <button id="restart-button" type="button">RUN IT BACK <b>↻</b></button>
+        </div>
+      </section>
+    </section>
+
+    <footer><span><b>MOVE</b> Pointer / WASD / Arrows</span><span><b>CATCH</b> Hold Shift / primary pointer</span><span><b>RETURN</b> Space / secondary pointer</span></footer>
+  </main>
+  <script src="game.js"></script>
+</body>
 </html>

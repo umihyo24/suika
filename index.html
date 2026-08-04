@@ -49,6 +49,19 @@
           <button id="restart-button" type="button">RUN IT BACK <b>↻</b></button>
         </div>
       </section>
+
+      <section id="reward-overlay" class="overlay hidden" aria-live="polite">
+        <div class="panel reward-panel">
+          <p class="eyebrow">ENCOUNTER CLEAR · PICK ONE</p>
+          <h2>POWER <i>UP!</i></h2>
+          <div class="reward-options" role="group" aria-label="Choose one upgrade">
+            <button type="button" data-upgrade="catchRange"><b>◯</b><span>Catch Range<strong>+15%</strong></span></button>
+            <button type="button" data-upgrade="returnSpeed"><b>➜</b><span>Return Speed<strong>+15%</strong></span></button>
+            <button type="button" data-upgrade="justWindow"><b>✦</b><span>Just Catch Window<strong>+0.03 sec</strong></span></button>
+          </div>
+          <small>Choose once. The next short encounter starts immediately.</small>
+        </div>
+      </section>
     </section>
 
     <footer><span><b>MOVE</b> Pointer / WASD / Arrows</span><span><b>CATCH</b> Hold Shift / primary pointer</span><span><b>RETURN</b> Space / secondary pointer</span></footer>
